@@ -1,11 +1,12 @@
 # QMJSTL
 用C++11实现的STL标准库，容器和算法包含但不限于STL
+容器实现了几乎所有标准接口,无异常处理
 
-**代码测试环境: vs2015,O2优化,64位,i3处理器**
+**代码测试环境: vs2015,release,O2优化,64位,i3处理器**
 
 以下为一些数据结构的设计,和某些算法的数学证明
 (主要是 ***<<stl源码剖析>>*** 没有写出来的).
-未特殊说明,下文中`std/stl`全部指代`vs201`5自带的标准库
+未特殊说明,下文中`std/stl`全部指代`vs2015`自带的标准库
 
 ## 内存池
 分配器在`allocator.h`中,第一级配置器使用`malloc-free`作为分配
@@ -30,9 +31,9 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 为`qmj::map`和`qmj::set`基类,在文件`rb_tree.h`中,树中所有叶节点和
 少子节点(没有左节点或右节点)的空闲指针以及根节点的父节点都指向
-名为'NIL'的黑色节点.
+名为`NIL`的黑色节点.
 
-1.在插入和删除中始终维护NIL的父节点的为空,以作为NIL的标识,左节点
+1.在插入和删除中始终维护`NIL`的父节点的为空,以作为`NIL`的标识,左节点
 指向树中的最大节点,右节点指向最小节点,这可让迭代器递增递减算法
 更加简洁高效.
 
@@ -62,7 +63,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 `std::rbt::lower_bound`作为查找内部函数.该操作可能进行额外的递增
 /递减操作.
 	
-##哈希表:
+## 哈希表:
 
 ![hashtable](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/hashtable.png)
 
@@ -108,7 +109,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 对于`equal_range`将造成阻碍.
 
 1.直接对当前迭代器所指元素调用hash函数来判断元素是否在目标桶中,
-当hash函数开销比较大.
+但hash函数开销比较大.
 
 2.添加哨兵节点,`next==nullptr`,`next_bucket`指向了下一个桶,如图
 	
@@ -118,9 +119,30 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 文件中的`hashtable`并未使用上述3个算法
 	
-	
-	
-	
+## vector
+
+在文件`vector_qmj.h`中
+
+![vector](https://github.com/MouJieQin/QMJSTL/tree/master/image/vector)
+
+比`std::vector`快的原因在于`std::vector`使用`new`对于预分配的内存
+会全部进行构造,而`qmj::vector`只构造`qmj::vector::size`大小的内存
+
+## list/forward_list/slist
+
+1.`slist`不是单向链表,`list`继承自`slist`,不同之处在于`slist::splice`
+复杂度O(1),`slist::size()`复杂度O(n).而`qmj::list::splice`复杂度O(n),
+`qmj::list::size`复杂度O(1).
+
+2.如果使用一级配置器,链表类容器`qmj`相对于`std`没有明显效率改善,使用内存池
+分配器后,效率有质的改变.如图
+
+![forward_list](https://github.com/MouJieQin/QMJSTL/blob/master/image/list/forward_list.png)
+
+![list](https://github.com/MouJieQin/QMJSTL/blob/master/image/list/list.png)
+
+3.`list/slist`使用回溯归并排序`iterator merge_sort(first,last,len,cmp)`,
+返回值为排好序区间的首迭代器.`forward_list`也使用了归并排序
 	
 	
 	
