@@ -1,14 +1,13 @@
 # QMJSTL
 用C++11实现的STL标准库，容器和算法包含但不限于STL
 
-![unordered_set](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set.png)
 	***代码测试环境: vs2015,O2优化,64位,i3处理器***
 	
 	以下为一些数据结构的设计,和某些算法的数学证明
-	(主要是***<<stl源码剖析>>***没有写出来的).
+	(主要是 *** <<stl源码剖析>> *** 没有写出来的).
 	未特殊说明,下文中std/stl全部指代vs2015自带的标准库
 
-##内存池
+## 内存池
 
 	分配器在'allocator.h'中,第一级配置器使用malloc-free作为分配
 	释放器.第二级分配器使用内存池,对于请求大于128字节的,第二级分配器
@@ -25,9 +24,9 @@
 	构造函数,所以不支持动态改变容器的分配器.即使在编译器提供分配器也要
 	符合allocator_base的接口.
 
-##红黑树
-
-	![rb_tree](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/RB_tree%20for%20map.png)
+## 红黑树
+	
+![rb_tree](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/RB_tree%20for%20map.png)
 
 	为qmj::map和qmj::set基类,在文件'rb_tree.h'中,树中所有叶节点和
 	少子节点(没有左节点或右节点)的空闲指针以及根节点的父节点都指向
@@ -46,12 +45,11 @@
 	std快.实际上经过测试发现对qmj::rbt的遍历并没有提高多少速度,原因在于
 	根据Amdahl定律,相对于O(n)复杂度的遍历,O(l)的迭代器提取所占的总体
 	百分比太少.所以我的算法反而复杂了代码.
-	
-	![set](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/set.png)
+![set](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/set.png)
 	
 	对1000000个无重复随机int整数的set对比测试
 	
-	![multi data](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/set%20multiData.png)
+![multi data](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/set%20multiData.png)
 	
 	对1000000个随机int整数的set对比测试,其中无重复数据32768个
 	
@@ -65,7 +63,7 @@
 
 ##哈希表:
 
-	![hashtable](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/hashtable.png)
+![hashtable](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/hashtable.png)
 	
 	qmj::unordered_map和qmj::unordered_set的基类,在文件'hashtable.h'中.
 	
@@ -76,15 +74,15 @@
 	例如比对两个允许相同关键字的hashtable内的元素是否相等时就会多次调用
 	equal_range.
 	
-	![unordered_set](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set.png)
+![unordered_set](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set.png)
 	
 	以上测试unordered_set无重复数据
 	
-	![unordered_set multi data](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set%20multiData.png)
+![unordered_set multi data](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set%20multiData.png)
 	
 	以上测试unordered_set有3/4重复数据
 	
-	![unordered_multiset](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set.png)
+![unordered_multiset](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set.png)
 	
 	以上测试unordered_multiset
 	
@@ -104,7 +102,7 @@
 	
 	这样各个节点将会变成单向链表,如图
 	
-	![hashtable_qmj](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/qmj_hashtable.png)
+![hashtable_qmj](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/qmj_hashtable.png)
 	
 	但这会造成一个问题,无法直接判断一个桶中的local_iterator是否走到尽头,
 	对于equal_range将造成阻碍.
@@ -114,7 +112,7 @@
 	
 	2.添加哨兵节点,next==nullptr,next_bucket指向了下一个桶,如图
 	
-	![hashtable1_qmj](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/qmj_hashtable1.png)
+![hashtable1_qmj](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/qmj_hashtable1.png)
 	
 	3.令每个桶存储一个结构体而不是一个指针,其中包含节点指针和桶元素计数器,无图.
 	
