@@ -1,13 +1,29 @@
 # QMJSTL
 用C++11实现的STL标准库，容器和算法包含但不限于STL
 
-
 	以下为一些数据结构的设计,和某些算法的数学证明(主要是<<stl源码剖析>>没有写出来的).
 	代码测试环境: vs2015,O2优化,64位,i3处理器,未特殊说明,下文中std/stl全部指代
 	vs2015自带的标准库
 
-![rb_tree](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/RB_tree%20for%20map.png)
+***内存池***:
+	分配器在'allocator.h'中,第一级配置器使用malloc-free作为分配
+	释放器.第二级分配器使用内存池,对于请求大于128字节的,第二级分配器
+	直接调用第一级分配器.这两级配置器的程序照搬自<<stl源码剖析>>的
+	SGI的某一版实现.
+	
+	优点:使用内存池后能显著提高某些容器的速度,如链表.
+	缺点:该内存池对于小于128 bytes的内存并不归还给系统,
+	总是保留内存高峰期的使用内存.像一个体温计.针对这一点该头文件
+	提供两个分配器,一个是qmj容器的默认内存分配器allocator,使用二级分配器.
+	另一个是simple_allocator使用一级分配器.这两个分配器都不符合标准.
+	
+	qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提供接受分配器的
+	构造函数,所以不支持动态改变容器的分配器.即使在编译器提供分配器也要
+	符合allocator_base的接口.
+
 ***红黑树***:
+	![rb_tree](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/RB_tree%20for%20map.png)
+
 	为qmj::map和qmj::set基类,在文件'rb_tree.h'中,树中所有叶节点和
 	少子节点(没有左节点或右节点)的空闲指针以及根节点的父节点都指向
 	名为'NIL'的黑色节点.
@@ -37,6 +53,9 @@
 	![multiset](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/multiset.png)
 	对1000000个随机有重复整数的multiset对比测试,(图中set test 标题有误)
 	
+	2.qmj::rbt::find()比std::rbt::find()更快的原因在于std使用了
+	std::rbt::lower_bound作为查找内部函数.该操作可能进行额外的递增
+	/递减操作.
 	
 	
 	
