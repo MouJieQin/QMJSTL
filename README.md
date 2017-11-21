@@ -53,13 +53,69 @@
 	对1000000个随机int整数的set对比测试,其中无重复数据32768个
 	
 	![multiset](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/multiset.png)
-	
 	对1000000个随机有重复整数的multiset对比测试,(图中set test 标题有误)
 	
 	2.qmj::rbt::find()比std::rbt::find()更快的原因在于std使用了
 	std::rbt::lower_bound作为查找内部函数.该操作可能进行额外的递增
 	/递减操作.
 	
+
+***哈希表***:
+
+	![hashtable](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/hashtable.png)
+	
+	qmj::unordered_map和qmj::unordered_set的基类,在文件'hashtable.h'中.
+	
+	1.对于qmj::hashtable::equal_range(key),该函数返回表中关键字key所在
+	的区间迭代器,我使用的算法是在调用该算法时才改变内部结构,让在一个桶中
+	具有关键字key的节点连在一起.这样做的优点是加速插入,缺点是如果多次
+	调用该算法,该算法每次都会遍历该关键字所在桶中的每一个节点.
+	例如比对两个允许相同关键字的hashtable内的元素是否相等时就会多次调用
+	equal_range.
+	
+	![unordered_set](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set.png)
+	
+	以上测试unordered_set无重复数据
+	
+	![unordered_set multi data](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set%20multiData.png)
+	
+	以上测试unordered_set有3/4重复数据
+	
+	![unordered_multiset](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set.png)
+	
+	以上测试unordered_multiset
+	
+	qmj::unorder_multi::operator== 和access(遍历)慢很多,operator==慢
+	一是因为遍历慢,而是因为equal_range每次都要遍历桶中全部元素.
+	operator==使用了qmj::is_permutation,该算法确定第一个区间
+	是否是第二个区间的排列组合,复杂度O(n^2).隐藏在其中的常数非常大,
+	如果直接使用该算法是没有用处的.但是hashtable::equal_range是常数时间,
+	所以operator==对两个hashtable::equal_range里的元素区间进行比较,
+	一般桶里的元素数目为常数,所以整个算法复杂度为O(n)
+	
+	**改进遍历速度的方法**:
+	
+	维护一个节点指针head,初始化为nullptr,每当一个空桶插入元素,就让新插入
+	的元素的next指针指向head,然后让head指向新插入的元素.删除时如果一个桶
+	变为空,更新head指向删除元素的next.
+	
+	这样各个节点将会变成单向链表,如图
+	
+	![hashtable_qmj](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/qmj_hashtable.png)
+	
+	但这会造成一个问题,无法直接判断一个桶中的local_iterator是否走到尽头,
+	对于equal_range将造成阻碍.
+	
+	1.直接对当前迭代器所指元素调用hash函数来判断元素是否在目标桶中,
+	当hash函数开销比较大.
+	
+	2.添加哨兵节点,next==nullptr,next_bucket指向了下一个桶,如图
+	
+	![hashtable1_qmj](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/qmj_hashtable1.png)
+	
+	3.令每个桶存储一个结构体而不是一个指针,其中包含节点指针和桶元素计数器,无图.
+	
+	文件中的hashtable并未使用上述3个算法
 	
 	
 	
