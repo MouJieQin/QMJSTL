@@ -150,9 +150,9 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 `std::deque`架构较为复杂,其中`map`是指向`block`(区块)的映射表,也就是指针的指针,
 根据单个`value_type`的数据大小来指定区块所存元素个数.当需要在首尾插入数据时,就将
-`map`的首尾指针指向数据地址.
+`map`的首尾指针指向区块地址.
 
-![qmj::deque)(https://github.com/MouJieQin/QMJSTL/blob/master/image/deque/qmj__deuqe.png)
+![qmj::dequ])(https://github.com/MouJieQin/QMJSTL/blob/master/image/deque/qmj__deuqe.png)
 
 `qmj::deque`限定`map`的指针映射一个数据元素而不是一个区块,如果需要在中间插入元素
 `qmj::deque`能获得更高的性能,因为`qmj::deque`只需要使用`memcpy`移动`map`中的指针,
@@ -163,6 +163,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 元素没有明显提高,但如果使用内存池分配器,速度会快上很多.
 
 ![deque-not pod](https://github.com/MouJieQin/QMJSTL/blob/master/image/deque/deque-not%20pod.png)
+***deque 非POD数据测试***
 
 2.当元素较小时,如果`qmj::deque`不使用内存池配置器,为一个较小的元素单独分配和释放内存,
 花费的开销太大,速度比`std::deque`慢上很多.(使用内存池配置器后又会快上很多)
@@ -175,6 +176,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 数据移动直接使用`memcpy`,与`qmj::vector`的不同之处只在`qmj::deque`在预分配内存的中间开始使用而不是头部.
 
 ![deque-int(POD)](https://github.com/MouJieQin/QMJSTL/blob/master/image/deque/deque-%20int.png)
+***deque int数据类型测试***
 
 对于`qmj::deque`的使用和`std::deque`一致,`qmj::deque`会自动检测,如果元素小于一个指针的大小
 或者该元素为`POD`类型并且小于10个指针的大小时会自动调用`qmj::vector`模型的`deque`.
