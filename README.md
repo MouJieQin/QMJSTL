@@ -66,7 +66,9 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 ## 哈希表
 
 ![hashtable](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/hashtable.png)
+
 ***图中的桶是连续内存***
+
 `qmj::unordered_map`和`qmj::unordered_set`的基类,在文件`hashtable.h`中.
 对于`qmj::hashtable::equal_range(key)`,该函数返回表中关键字`key`所在
 的区间迭代器,我使用的算法是在调用该算法时才改变内部结构,让在一个桶中
@@ -152,7 +154,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 根据单个`value_type`的数据大小来指定区块所存元素个数.当需要在首尾插入数据时,就将
 `map`的首尾指针指向区块地址.
 
-![qmj::dequ])(https://github.com/MouJieQin/QMJSTL/blob/master/image/deque/qmj__deuqe.png)
+![qmj::dequ](https://github.com/MouJieQin/QMJSTL/blob/master/image/deque/qmj__deuqe.png)
 
 `qmj::deque`限定`map`的指针映射一个数据元素而不是一个区块,如果需要在中间插入元素
 `qmj::deque`能获得更高的性能,因为`qmj::deque`只需要使用`memcpy`移动`map`中的指针,
