@@ -8,7 +8,7 @@
 (主要是 ***<<stl源码剖析>>*** 没有写出来的).
 未特殊说明,下文中`std/stl`全部指代`vs2015`自带的标准库
 
-**=========== ==转载请注明出处== ===========**
+**=============转载请注明出处=============**
 
 ## 内存池
 分配器在`allocator.h`中,第一级配置器使用`malloc-free`作为分配
@@ -290,30 +290,30 @@ std,否则调用成员函数.
 		_QMJ iter_swap(first1,first2);
 }`
 
-`len1=_QMJ distance(first,mid)`
-`len2=_QMJ distance(mid,last)`
+`len1=_QMJ distance(first,mid);`
+`len2=_QMJ distance(mid,last);`
 
 #### forward_iterator
 
 ![rotate FIter](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/rotate_FIter.png)
 
-		`template<typename FIter>inline
-		void _rotate_imple(FIter first, FIter middle,
-			FIter last, std::forward_iterator_tag)
+	`template<typename FIter>inline
+	void _rotate_imple(FIter first, FIter middle,
+		FIter last, std::forward_iterator_tag)
+{
+	for (FIter mid = middle;;)
 	{
-		for (FIter mid = middle;;)
+		_QMJ iter_swap(first++, mid++);
+		if (first == middle)
 		{
-			_QMJ iter_swap(first++, mid++);
-			if (first == middle)
-			{
-				if (mid == last)
-					return;
-				middle = mid;
-			}
-			else if (mid == last)
-				mid = middle;
+			if (mid == last)
+				return;
+			middle = mid;
 		}
-	}`
+		else if (mid == last)
+			mid = middle;
+	}
+}`
 
 ##### 证明:
 
@@ -340,9 +340,9 @@ std,否则调用成员函数.
 
 ![rotate BIter](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/rotate%20BIter.png)	
 	
-`template<typename BIter>inline
-void _rotate_imple(BIter first, BIter middle,
-	BIter last, std::bidirectional_iterator_tag)
+	`template<typename BIter>inline
+	void _rotate_imple(BIter first, BIter middle,
+		BIter last, std::bidirectional_iterator_tag)
 {
 	_QMJ reverse(first, middle);
 	_QMJ reverse(middle, last);
