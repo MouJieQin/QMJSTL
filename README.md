@@ -234,6 +234,10 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 ## algorithm
 
+`qmj`没有完成的函数有`equal`,`copy`,`copy_backward`,`fill`等,
+原因在于看了`std`源码以后发现这些算法已经优化到了极致,
+重写一遍还要造很多型别判定的轮子,可能后面会补上.
+
 ### power
 
 `qmj::power(x,n,fn2)`在文件`numeric_qmj.h`中,是非标准算法.
@@ -264,19 +268,102 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 	
 ![power](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/power.gif)
 
+### iter_swap
 
+qmj::iter_swap在文件algorithm.h中.
+将两个迭代所指的对象对调,不同于std::iter_swap,
+qmj::iter_swap首先判定两个迭代是否是同类类型,
+不是同类型直接调用std::iter_swap,是同类类型然后判断
+迭代器是否有自定义的成员函数iter_swap,如果没有调用
+std,否则调用成员函数.
+
+### rotate
+
+`Assume:
+mySwap(first1,last1,first2,last2)
+{//_QMJ distance(first1,last1)=_QMJ distance(first2,last2)
+	for(;first!=last1;++firs1,++first2)
+		_QMJ iter_swap(first1,first2);
+}
+
+len1=_QMJ distance(first,mid)
+len2=_QMJ distance(mid,last)`
+
+#### forward_iterator
+
+![rotate FIter](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/rotate_FIter.png)
+
+		`template<typename FIter>inline
+		void _rotate_imple(FIter first, FIter middle,
+			FIter last, std::forward_iterator_tag)
+	{
+		for (FIter mid = middle;;)
+		{
+			_QMJ iter_swap(first++, mid++);
+			if (first == middle)
+			{
+				if (mid == last)
+					return;
+				middle = mid;
+			}
+			else if (mid == last)
+				mid = middle;
+		}
+	}`
+
+##### 证明:
+
+1.`len1=len2`
+`mySwap(first,mid,mid,last)`
+完成
+
+2.`len1<len2`
+`rotate(first,mid,last)=mySwap(first,mid,mid,mid+len1)+rotate(mid,mid+len1,last)`
+
+3.`len1>len2`
+`rotate(first,mid,last)=mySwap(first,first+len2,mid,last)+rotate(first+len2,mid,last)`
+
+##### 复杂度分析:
+
+花费为`mySwap`调用的次数和区间的长度的乘积,
+容易证明每次区间的长度为非递增状态,
+因为每次调用两个区间的的较短区间长度,然后较长区间要减去
+较小区间的长度.
+`0<α<1/2`,假设整个区间长度为`n`,某个区间的长度为`αn`,
+最多调用`n/(αn)`次,每次调用最多花费αn,复杂度为`n/(αn)*αn=O(n)`.
 	
+#### bidirectional_iterator
+
+![rotate BIter](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/rotate%20BIter.png)	
 	
+		`template<typename BIter>inline
+		void _rotate_imple(BIter first, BIter middle,
+			BIter last, std::bidirectional_iterator_tag)
+	{
+		_QMJ reverse(first, middle);
+		_QMJ reverse(middle, last);
+		_QMJ reverse(first, last);
+	}`
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+先完成两个区间的反转,最后对整个区间反转
+
+##### 证明:
+1.`len1=len2`
+`mySwap(first,mid,mid,last)`
+完成
+
+2.`len1<len2`
+`rotate(first,mid,last)=mySwap(first,mid,mid,mid+len1)+reverse(mid,last-len1)`
+
+3.`len1>len2`
+`rotate(first,mid,last)=mySwap(first,first+len2,mid,last)+reverse(first+len2,mid)`
+
+##### 复杂度:
+
+`O(n)`
+
+对于随机存储迭代器,由于测试 ***<<stl源码剖析>>*** 的速度没有直接使用
+双向迭代器的快,所以不证明.
 	
 	
 	
