@@ -232,13 +232,14 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 ![fib_heap](https://github.com/MouJieQin/QMJSTL/blob/master/image/heap/fib_heap.png)
 
 
-##algorithm
+## algorithm
 
-###power
+### power
 
 `qmj::power(x,n,fn2)`在文件`numeric_qmj.h`中,是非标准算法.
 该算法返回对`x`进行`fn2`操作的`n`幂次方,`fn2`要满足结合律而
 不需满足交换律,其中`n`必须是非负整数,复杂度`O(lg(n))`.
+
 		`template<typename value_type,
 		typename UnsignInteger,
 		typename Fn2>
