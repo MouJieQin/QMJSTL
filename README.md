@@ -8,7 +8,7 @@
 (主要是 ***<<stl源码剖析>>*** 没有写出来的).
 未特殊说明,下文中`std/stl`全部指代`vs2015`自带的标准库
 
-**转载请注明出处**
+**=============转载请注明出处=============**
 
 ## 内存池
 分配器在`allocator.h`中,第一级配置器使用`malloc-free`作为分配
@@ -268,9 +268,9 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 		return (result);
 	}`
 	
-![power](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/power.gif)
-
 **证明假设fn2为乘法操作**
+	
+![power](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/power.gif)
 
 ### iter_swap
 
@@ -288,7 +288,7 @@ mySwap(first1,last1,first2,last2)
 {//_QMJ distance(first1,last1)=_QMJ distance(first2,last2)
 	for(;first!=last1;++firs1,++first2)
 		_QMJ iter_swap(first1,first2);
-}`
+}
 
 len1=_QMJ distance(first,mid)
 len2=_QMJ distance(mid,last)`
@@ -402,7 +402,7 @@ len2=_QMJ distance(mid,last)`
 将接受的区间随机重排,也就是在N!中可能的元素序列中随机选择一种.
 qmj并没有重新实现这一个函数.	
 
-	template<typename RIter>inline
+	`template<typename RIter>inline
 	void random_shuffle(RIter first,RIter last)
 	{
 		_QMJ iter_dif_t<RIter> len=last-first;
@@ -410,7 +410,7 @@ qmj并没有重新实现这一个函数.
 			return;
 		for(_QMJ iter_dif_t<RIter> i=1;i!=len;++i)
 			_QMJ iter_swap((first+i),first+(rand()%(i+1)));
-	}
+	}`
 
 #### 证明:
 
