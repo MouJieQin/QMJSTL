@@ -8,6 +8,8 @@
 (主要是 ***<<stl源码剖析>>*** 没有写出来的).
 未特殊说明,下文中`std/stl`全部指代`vs2015`自带的标准库
 
+**转载请注明出处**
+
 ## 内存池
 分配器在`allocator.h`中,第一级配置器使用`malloc-free`作为分配
 释放器.第二级分配器使用内存池,对于请求大于128字节的,第二级分配器
@@ -222,7 +224,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 ![heap_sort](https://github.com/MouJieQin/QMJSTL/blob/master/image/heap/heap_sort.png)
 
-对重复或增序数据较快的原因在于改进的`heapify`(堆维护算法)复杂对变成了`O(1)`
+对重复或增序数据较快的原因在于改进的`heapify`(堆维护算法)复杂度变成了`O(1)`
 
 ### fib_heap
 
@@ -268,6 +270,8 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 	
 ![power](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/power.gif)
 
+**证明假设fn2为乘法操作**
+
 ### iter_swap
 
 qmj::iter_swap在文件algorithm.h中.
@@ -284,7 +288,7 @@ mySwap(first1,last1,first2,last2)
 {//_QMJ distance(first1,last1)=_QMJ distance(first2,last2)
 	for(;first!=last1;++firs1,++first2)
 		_QMJ iter_swap(first1,first2);
-}
+}`
 
 len1=_QMJ distance(first,mid)
 len2=_QMJ distance(mid,last)`
@@ -348,6 +352,7 @@ len2=_QMJ distance(mid,last)`
 先完成两个区间的反转,最后对整个区间反转
 
 ##### 证明:
+
 1.`len1=len2`
 `mySwap(first,mid,mid,last)`
 完成
@@ -365,8 +370,55 @@ len2=_QMJ distance(mid,last)`
 对于随机存储迭代器,由于测试 ***<<stl源码剖析>>*** 的速度没有直接使用
 双向迭代器的快,所以不证明.
 	
+### next_permutation/prev_permutation
+
+求序列的下一个(上一个)排列.
+
+***首先,从最尾端开始往前寻找两个相邻元素,令第一元素为`*i`,第二元素为`*ii`,且
+满足`*i<*ii`.找到这样一组相邻元素后,再从尾端开始往前检验,找出第一个大于
+`*i`的元素,令为`*j`,将`i,j`元素对调,再将`ii`之后的所有元素颠倒排列,此即所求之
+"下一个"排列组合.*** 
+                              -------- **<<stl源码剖析>>** 
 	
+![next_permutation](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/next_permutation.png)
+
+#### 证明:
+
+假设一个序列的每一个元素是非递减的,它的最后一个排列一定是非递增的.
+这两者之间的排列一定是严格递增的
+
+`0 1 2 3 4	0 1 2 4 3	0 1 3 2 4	0 1 3 4 2	...	4 3 2 1 0`
+
+所谓下一个排列亦即重新排列元素,并使整个序列表示的数字增长最小的排列.
+要使元素增长最小自然从最低位开始向高位开始查找.
+图中区间`S`中的元素由于是严格递减的(从左往右),不可能
+重新排列这个区间的元素使序列变大.所以要替换`*i`.
+从后向前找到的第一个不小于(对于有重复元素的序列)`*i`的元素`*j`.
+根据单调性,`*j`一定是在区间`S`中最接近`*i`的.交换`*i`和`*j`后区间`S`仍然是
+严格递减的.再将区间`S`颠倒便得到区间`S`所能组成的最小序列.
+
 	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
 	
 	
