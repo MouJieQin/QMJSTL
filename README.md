@@ -246,27 +246,27 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 该算法返回对`x`进行`fn2`操作的`n`幂次方,`fn2`要满足结合律而
 不需满足交换律,其中`n`必须是非负整数,复杂度`O(lg(n))`.
 
-		`template<typename value_type,
-		typename UnsignInteger,
-		typename Fn2>
-		value_type power(value_type x, UnsignInteger n, const Fn2& fn2)
-	{//N=(2^a)*b
-		if (n <= 0)
-			return (x);
-		for (; !(n & 1);)
-		{//循环a次
-			n >>= 1;
-			x = fn2(x, x);
-		}
-		value_type result = x;//result=X^(2a),n==b
-		for (n >>= 1; n != 0; n >>= 1)
-		{
-			x = fn2(x, x);
-			if (n & 1)
-				result = fn2(result, x);
-		}
-		return (result);
-	}`
+`template<typename value_type,
+	typename UnsignInteger,
+	typename Fn2>
+	value_type power(value_type x, UnsignInteger n, const Fn2& fn2)
+{//N=(2^a)*b
+	if (n <= 0)
+		return (x);
+	for (; !(n & 1);)
+	{//循环a次
+		n >>= 1;
+		x = fn2(x, x);
+	}
+	value_type result = x;//result=X^(2a),n==b
+	for (n >>= 1; n != 0; n >>= 1)
+	{
+		x = fn2(x, x);
+		if (n & 1)
+			result = fn2(result, x);
+	}
+	return (result);
+}`
 	
 **证明假设fn2为乘法操作**
 	
@@ -283,21 +283,21 @@ std,否则调用成员函数.
 
 ### rotate
 
-`Assume:`
-`void mySwap(first1,last1,first2,last2)
+`Assume:
+void mySwap(first1,last1,first2,last2)
 {//_QMJ distance(first1,last1)=_QMJ distance(first2,last2)
 	for(;first!=last1;++firs1,++first2)
 		_QMJ iter_swap(first1,first2);
 }`
 
-`len1=_QMJ distance(first,mid);`
-`len2=_QMJ distance(mid,last);`
+`len1=_QMJ distance(first,mid);
+len2=_QMJ distance(mid,last);`
 
 #### forward_iterator
 
 ![rotate FIter](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/rotate_FIter.png)
 
-	`template<typename FIter>inline
+`template<typename FIter>inline
 	void _rotate_imple(FIter first, FIter middle,
 		FIter last, std::forward_iterator_tag)
 {
@@ -340,7 +340,7 @@ std,否则调用成员函数.
 
 ![rotate BIter](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/rotate%20BIter.png)	
 	
-	`template<typename BIter>inline
+`template<typename BIter>inline
 	void _rotate_imple(BIter first, BIter middle,
 		BIter last, std::bidirectional_iterator_tag)
 {
