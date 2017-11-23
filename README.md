@@ -87,7 +87,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 	
 ![unordered_multiset](https://github.com/MouJieQin/QMJSTL/blob/master/image/hashtable/unordered_set.png)
 	
-***以上测试unordered_multiset
+***以上测试unordered_multiset***
 	
 `qmj::unorder_multi(set/map)::operator==` 和`access`(遍历)慢很多,`operator==`慢
 一是因为遍历慢,二是因为`equal_range`每次都要遍历桶中全部元素.
@@ -232,10 +232,38 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 ![fib_heap](https://github.com/MouJieQin/QMJSTL/blob/master/image/heap/fib_heap.png)
 
 
+##algorithm
+
+###power
+
+`qmj::power(x,n,fn2)`在文件`numeric_qmj.h`中,是非标准算法.
+该算法返回对`x`进行`fn2`操作的`n`幂次方,`fn2`要满足结合律而
+不需满足交换律,其中`n`必须是非负整数,复杂度`O(lg(n))`.
+		`template<typename value_type,
+		typename UnsignInteger,
+		typename Fn2>
+		value_type power(value_type x, UnsignInteger n, const Fn2& fn2)
+	{//N=(2^a)*b
+		if (n <= 0)
+			return (x);
+		for (; !(n & 1);)
+		{//循环a次
+			n >>= 1;
+			x = fn2(x, x);
+		}
+		value_type result = x;//result=X^(2a),n==b
+		for (n >>= 1; n != 0; n >>= 1)
+		{
+			x = fn2(x, x);
+			if (n & 1)
+				result = fn2(result, x);
+		}
+		return (result);
+	}`
 	
-	
-	
-	
+![power](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/power.gif)
+
+
 	
 	
 	
