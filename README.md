@@ -40,11 +40,11 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 ### 维护这一算法的复杂度分析:
 由于极值节点都在`NIL`中,`rbt::begin`,`rbt::end()`可为常数时间,虽然
 没有增加每次插入删除的复杂度,但会增加`rbt::insert`,`rbt::erase`等
-的常数.对比通过`rbt::minimum(root)`,`rbt::maximum(root)`复杂度O(lgn),
+的常数.对比通过`rbt::minimum(root)`,`rbt::maximum(root)`复杂度`O(lgn)`,
 来获得最小最大节点来说.如果经常进行插入删除操作,而较少使用迭代器
 可能有点得不偿失.但经过测试,`qmj::rbt::insert`,`qnj::rbt::erase`还是比
 `std`快.实际上经过测试发现对`qmj::rbt`的遍历并没有提高多少速度,原因在于
-根据`Amdahl`定律,相对于O(n)复杂度的遍历,O(l)的迭代器提取所占的总体
+根据`Amdahl`定律,相对于`O(n)`复杂度的遍历,`O(l)`的迭代器提取所占的总体
 百分比太少.所以我的算法反而复杂了代码.
 
 ![set](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/set.png)
@@ -92,10 +92,10 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 `qmj::unorder_multi(set/map)::operator==` 和`access`(遍历)慢很多,`operator==`慢
 一是因为遍历慢,二是因为`equal_range`每次都要遍历桶中全部元素.
 `operator==`使用了`qmj::is_permutation`,该算法确定第一个区间
-是否是第二个区间的排列组合,复杂度O(n^2).隐藏在其中的常数非常大,
+是否是第二个区间的排列组合,复杂度`O(n^2)`.隐藏在其中的常数非常大,
 如果直接使用该算法是没有用处的.但是`hashtable::equal_range`是常数时间,
 所以`operator==`对两个`hashtable::equal_range`里的元素区间进行比较,
-一般桶里的元素数目为常数,所以整个算法复杂度为O(n)
+一般桶里的元素数目为常数,所以整个算法复杂度为`O(n)`.
 
 ### 改进遍历速度的方法
 
@@ -133,8 +133,8 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 ## list/forward_list/slist
 
 1.`slist`不是单向链表,`list`继承自`slist`,不同之处在于`slist::splice`
-复杂度O(1),`slist::size()`复杂度O(n).而`qmj::list::splice`复杂度O(n),
-`qmj::list::size`复杂度O(1).
+复杂度`O(1)`,`slist::size()`复杂度`O(n)`.而`qmj::list::splice`复杂度`O(n)`,
+`qmj::list::size`复杂度`O(1)`.
 
 2.如果使用一级配置器,链表类容器`qmj`相对于`std`没有明显效率改善,使用内存池
 分配器后,效率有质的改变.如图
@@ -154,7 +154,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 根据单个`value_type`的数据大小来指定区块所存元素个数.当需要在首尾插入数据时,就将
 `map`的首尾指针指向区块地址.
 
-![qmj::dequ](https://github.com/MouJieQin/QMJSTL/blob/master/image/deque/qmj__deuqe.png)
+![qmj::deque](https://github.com/MouJieQin/QMJSTL/blob/master/image/deque/qmj__deuqe.png)
 
 `qmj::deque`限定`map`的指针映射一个数据元素而不是一个区块,如果需要在中间插入元素
 `qmj::deque`能获得更高的性能,因为`qmj::deque`只需要使用`memcpy`移动`map`中的指针,
@@ -186,6 +186,67 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 较慢.使用`qmj::deque<value_type,Alloc,value_type>`模式会强制调用映射模型的`qmj::deque`.
 
 
+## priority_queue/fib_heap
+
+`binary_heap/fib_heap`在文件`heap.h`中,`qmj::priority_queue`在文件`queue_qmj.h`中
+
+### binary_heap
+
+`std::priority_queue`包含一个容器,主体算法都来自`algorithm.std::pop_heap`,
+`std::push_heap`.我也写了同名算法,不过在`qmj::binary_heap`里重新写了一遍.
+与`std`的不同之处在于`pop_heap`算法.
+
+`std::pop_heap`算法将`top(root)`元素移出后,通过迭代下溯从子树元素提取元素填补洞口,
+最后在叶子节点会空出一个洞口,然后以该洞口洞号开始为尾端元素上溯使用`std::push_heap`
+找到合适洞口.
+
+`qmj::pop_heap`算法使用的`heapify`(堆维护)算法则直接在下溯中为尾端元素找到洞口,
+而没有再使用一次`push_heap`上溯.但跌代体中会多出一个控制流.
+
+`pop_heap`算法分析,因为尾端元素原本就是叶节点,所以它的优先权重较小,更有可能就在底层
+找到洞口,而且由于二叉堆是满二叉树,大部分数据就在底层(2^n-1个元素的满二叉树的叶节点
+占总体元素一半),所以综合来看`std::pop_heap`堆更合理.
+
+![priority_queue](https://github.com/MouJieQin/QMJSTL/blob/master/image/heap/priority_queue.png)
+
+经过测试,对于随机数据,两者速度没有明显差异.但对于具有较多重复
+元素的数据,`qmj::priority_queue`(继承自`qmj::binary_heap`)快10%左右.
+
+对于随机数据`qmj::make_heap比std::make_heap`快20%,对于完全重复或降序数据快80%.
+增序无较大差异.
+
+![make_heap](https://github.com/MouJieQin/QMJSTL/blob/master/image/heap/make_heap.png)
+
+对于随机数据`qmj::sort_heap`和`std::sort_heap`无明显速度差异,对于有序数据(增序/降序)
+`qmj::sort_heap`要快,而对于重复数据.如图
+
+![heap_sort](https://github.com/MouJieQin/QMJSTL/blob/master/image/heap/heap_sort.png)
+
+对重复或增序数据较快的原因在于改进的`heapify`(堆维护算法)复杂对变成了`O(1)`
+
+### fib_heap
+
+斐波那契堆主要用于优化后面的图算法,和`binary_heap`相比,隐藏在其中的常数非常大.
+是其9倍左右.
+	
+![fib_heap](https://github.com/MouJieQin/QMJSTL/blob/master/image/heap/fib_heap.png)
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
