@@ -8,7 +8,7 @@
 (主要是 ***<<stl源码剖析>>*** 没有写出来的).
 未特殊说明,下文中`std/stl`全部指代`vs2015`自带的标准库
 
-**=============转载请注明出处=============**
+**=========== ==转载请注明出处== ===========**
 
 ## 内存池
 分配器在`allocator.h`中,第一级配置器使用`malloc-free`作为分配
@@ -283,15 +283,15 @@ std,否则调用成员函数.
 
 ### rotate
 
-`Assume:
-mySwap(first1,last1,first2,last2)
+`Assume:`
+`void mySwap(first1,last1,first2,last2)
 {//_QMJ distance(first1,last1)=_QMJ distance(first2,last2)
 	for(;first!=last1;++firs1,++first2)
 		_QMJ iter_swap(first1,first2);
-}
+}`
 
-len1=_QMJ distance(first,mid)
-len2=_QMJ distance(mid,last)`
+`len1=_QMJ distance(first,mid)`
+`len2=_QMJ distance(mid,last)`
 
 #### forward_iterator
 
@@ -340,14 +340,14 @@ len2=_QMJ distance(mid,last)`
 
 ![rotate BIter](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/rotate%20BIter.png)	
 	
-		`template<typename BIter>inline
-		void _rotate_imple(BIter first, BIter middle,
-			BIter last, std::bidirectional_iterator_tag)
-	{
-		_QMJ reverse(first, middle);
-		_QMJ reverse(middle, last);
-		_QMJ reverse(first, last);
-	}`
+`template<typename BIter>inline
+void _rotate_imple(BIter first, BIter middle,
+	BIter last, std::bidirectional_iterator_tag)
+{
+	_QMJ reverse(first, middle);
+	_QMJ reverse(middle, last);
+	_QMJ reverse(first, last);
+}`
 	
 先完成两个区间的反转,最后对整个区间反转
 
@@ -402,15 +402,15 @@ len2=_QMJ distance(mid,last)`
 将接受的区间随机重排,也就是在N!中可能的元素序列中随机选择一种.
 qmj并没有重新实现这一个函数.	
 
-	`template<typename RIter>inline
-	void random_shuffle(RIter first,RIter last)
-	{
-		_QMJ iter_dif_t<RIter> len=last-first;
-		if(len<2)
-			return;
-		for(_QMJ iter_dif_t<RIter> i=1;i!=len;++i)
-			_QMJ iter_swap((first+i),first+(rand()%(i+1)));
-	}`
+`template<typename RIter>inline
+void random_shuffle(RIter first,RIter last)
+{
+	_QMJ iter_dif_t<RIter> len=last-first;
+	if(len<2)
+		return;
+	for(_QMJ iter_dif_t<RIter> i=1;i!=len;++i)
+		_QMJ iter_swap((first+i),first+(rand()%(i+1)));
+}`
 
 #### 证明:
 
@@ -431,35 +431,35 @@ qmj并没有重新实现这一个函数.
 
 ### partial_sort
 
-	`template<typename RIter,
-		typename Comp>inline
-		void partial_sort(RIter first, RIter middle, RIter last,
-			const Comp&cmp)
+`template<typename RIter,
+	typename Comp>inline
+	void partial_sort(RIter first, RIter middle, RIter last,
+		const Comp&cmp)
+{
+	iter_dif_t<RIter> len = middle - first;
+	if (!len)
+		return;
+	else if (len == 1)
 	{
-		iter_dif_t<RIter> len = middle - first;
-		if (!len)
-			return;
-		else if (len == 1)
+		_QMJ iter_swap(first, _QMJ min_element(first, last, cmp));
+		return;
+	}
+	_QMJ make_heap(first, middle,cmp);
+	for (RIter cur = middle; cur != last; ++cur)
+		if (cmp(*cur, *first))
 		{
-			_QMJ iter_swap(first, _QMJ min_element(first, last, cmp));
-			return;
+			iter_val_t<RIter>val = std::move(*cur);
+			*cur = std::move(*first);
+			_QMJ _heapify(first, iter_dif_t<RIter>(0), len, std::move(val), cmp);
 		}
-		_QMJ make_heap(first, middle,cmp);
-		for (RIter cur = middle; cur != last; ++cur)
-			if (cmp(*cur, *first))
-			{
-				iter_val_t<RIter>val = std::move(*cur);
-				*cur = std::move(*first);
-				_QMJ _heapify(first, iter_dif_t<RIter>(0), len, std::move(val), cmp);
-			}
-		_QMJ sort_heap(first, middle,cmp);
-	}`
+	_QMJ sort_heap(first, middle,cmp);
+}`
 	
-	该函数使序列中的`middle-first`个最小元素以cmp制定的顺序排序置于`[first,middle)`内,
-	其余`last-middle`个元素安置于`[middle,last)`中,不保证有任何特定顺序.以下假设`cmp`为小于
-	比较符.
-	该函数首先对`[first,middle)`造堆,此时其中的最大元素位于`first`,然后遍历`[middle,last)`,
-	如果有元素小于`*first`,就交换两者,然后维护堆.最后调用堆排序对`[first,middle)`排序.
+该函数使序列中的`middle-first`个最小元素以cmp制定的顺序排序置于`[first,middle)`内,
+其余`last-middle`个元素安置于`[middle,last)`中,不保证有任何特定顺序.以下假设`cmp`为小于
+比较符.
+该函数首先对`[first,middle)`造堆,此时其中的最大元素位于`first`,然后遍历`[middle,last)`,
+如果有元素小于`*first`,就交换两者,然后维护堆.最后调用堆排序对`[first,middle)`排序.
 	
 #### 证明:
 
