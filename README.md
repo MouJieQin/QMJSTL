@@ -33,7 +33,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 	
 ![rb_tree](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/RB_tree%20for%20map.png)
 
-文件[rb_tree.h](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/rb_tree.h)
+[rb_tree.h](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/rb_tree.h)
 
 为`qmj::map`和`qmj::set`基类,树中所有叶节点和少子节点
 (没有左节点或右节点)的空闲指针以及根节点的父节点都指向名为`NIL`的黑色节点.
@@ -74,7 +74,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 ***图中的桶是连续内存***
 
-文件[hashtable.h](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/hashtable.h)
+[hashtable.h](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/hashtable.h)
 
 `qmj::unordered_map`和`qmj::unordered_set`的基类,
 对于`qmj::hashtable::equal_range(key)`,该函数返回表中关键字`key`所在
@@ -402,7 +402,7 @@ std,否则调用成员函数.
 假设一个序列的每一个元素是非递减的,它的最后一个排列一定是非递增的.
 这两者之间的排列一定是严格递增的
 
-`0 1 2 3 4	0 1 2 4 3	0 1 3 2 4	0 1 3 4 2	...	4 3 2 1 0`
+`0 1 2 3 4		0 1 2 4 3		0 1 3 2 4		0 1 3 4 2	...		4 3 2 1 0`
 
 所谓下一个排列亦即重新排列元素,并使整个序列表示的数字增长最小的排列.
 要使元素增长最小自然从最低位开始向高位开始查找.
