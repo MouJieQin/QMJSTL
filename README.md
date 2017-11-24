@@ -268,7 +268,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 		return (result);
 	}
 	
-**证明假设fn2为乘法操作**
+**证明假设fn2为乘法操作,其伪代码循环体中的if语句下面的语句应有一个缩进**
 	
 ![power](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/power.gif)
 
@@ -466,7 +466,7 @@ qmj并没有重新实现这一个函数.
 以下假设`cmp`为小于比较符.
 
 循环不变式:每次循环体开始之前,`*first`是`[first,cur)`个元素中第`middle-first`小的元素.
-由堆的性质`[first,middle)`是`[first,cur)`中`middle-first`个最小的元素.
+由堆的性质可知`[first,middle)`是`[first,cur)`中`middle-first`个最小的元素.
 
 初始时:`make_heap(first,middle)`,条件显然成立.
 
@@ -478,6 +478,12 @@ qmj并没有重新实现这一个函数.
 
 终止:`cur=last`.`*first`是`[first,last)`个元素中第`middle-first`小的元素.
 由堆的性质`[first,middle)`是`[first,last)`中`middle-first`个最小的元素.
+
+#### 复杂度分析:
+
+令`k=middle-first,n=last-first`,首先`make_heap`花费`O(k)`,最坏情况下后面循环体中每个元素
+都比`*first`小,将花费`O((n-k)*lg(k))`来找出`k`个最小元素.最后`sort_heap`花费`O(k*lgn(k))`,
+所以整个算法的复杂度为`O((n-k)*lg(k)+k*lgn(k)+k)=O(n*lg(k))`.
 
 ### sort
 
@@ -535,13 +541,81 @@ qmj并没有重新实现这一个函数.
 `qmj::sort`对递归深度有限制,一旦递归恶化(复杂度偏向`O(n^2)`)便调用堆排序.保证了复杂度`O(nlgn)`,
 对于最后进行的一次插入排序,也可证明是`O(n)`的.原因在于原序列被划分成了不大于阈值的若干个区间,
 每个区间的元素虽然不一定是有序的,但该区间与其他区间是独立的,该区间的元素是整个序列有序后该区间
-元素的一个排列.这便保证了插入排序内层循环的花费不会超过阈值.随意复杂度`O(n`).整个算法的复杂度
-`O(nlgn)`.
+元素的一个排列.这便保证了插入排序内层循环的花费不会超过阈值,内层循环为常数时间,插入排序复杂度`O(n`).
+整个算法的复杂度`O(nlgn)`.
 
+### stable_sort
 
+qmj::stable_sort 采用归并排序和插入排序,当序列长度大于阈值时采用归并排序,
+否则使用插入排序.qmj::stable_sort需要使用缓冲区.在有序(升序/降序)或重复元素
+较多时比std::stable_sort更快.
 
+qmj::stable_sort接受的比较符对应的有序区间和完全重复元素比std::stable_sort快50%,
+逆序快40%,随机数据没有明显提高.
 
+![stable_sort sorted/multi](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/stable_sort%20multi-sorted.png)
 
+***正序或完全重复元素***
+
+![stable_sort reverse](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/stable_sort%20reverse.png)
+
+***逆序***
+
+![stable_sort random](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/stable_sort%20random.png)
+
+***随机不重复数据***
+
+### search_n
+
+	template<typename FIter,
+			typename Dif,
+			typename value_type,
+			typename Pred>inline
+			FIter _search_n_imple(FIter first, FIter last,
+				Dif n, const value_type&val, const Pred&pred,
+				std::random_access_iterator_tag)
+		{
+			if (n <= 0)
+				return (first);
+			iter_dif_t<FIter> count = last - first;//size of [first,ast)
+			FIter result = first;//may be result
+			for (Dif mark = n - 1; mark < count; mark += n)
+			{
+				if (pred(first[mark], val))
+				{//[ret,first+mark] may be satisifyed
+					for (Dif cur = 0;; ++cur)
+						if (cur == n)
+							return (result);
+						else if (!pred(result[cur], val))
+						{//adjust mark
+							mark -= (n - cur - 1);
+							break;
+						}
+				}
+				result = first + mark + 1;//update ret
+			}
+			return (last);
+		}
+		
+![search_n](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/search_n.png)
+
+不同于<<stl源码剖析>>的代码.我使用其代码和`std`进行测试后发现要慢很多.
+那`std`一定使用了完全不同的方法,经过一段时间的调试我写出了这个算法.最后和
+`std`比对,虽然没有理清源码,但从注释上看它使用了和我一样的算法.我自认为
+我的代码比`std`源码更加简洁.
+
+假设`pred`为等于操作符:
+因为是随机迭代器,首先记录可能的序列首元素位置为`result`,而后测试这个可能序列
+的最后一个元素的下标为`mark`,如果`mark`与`val`不等,表明`result`到`(first+mark)`的元素
+不可能为所求结果,跳跃调整`result=first+(mark+1)`,`mark+=n`.重新进行以上测试.
+如果`mark`所指向的元素与`val`相等,便开始测试`[result,first+mark]`,如果里面的值全为
+`val`便返回`result`.否则记不等于`val`的元素距离`result`的相对距离的为`cur`,
+首先调整`mark`到`cur`所指元素到`first`的绝对距离,这里之所以不能远距离跳跃的原因在于
+虽然`result`不是符合区间的首元素,但是`[result,first+mark]`(里面的`mark`为未调整前的)
+可能具有符合条件的首元素.
+
+#### 复杂度:
+期望复杂度可以达到`O(n/k+k)`.其中`n`为序列的长度,`k`为查找的长度.
 
 
 
