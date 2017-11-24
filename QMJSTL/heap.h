@@ -60,17 +60,28 @@ namespace qmj
 		{
 		}
 
-		binary_heap(const self&rhs) :
-			heap_v(rhs.heap_v), comp(rhs.comp)
+		binary_heap(const self&x) :
+			heap_v(x.heap_v), comp(x.comp)
 		{
-			build_heap();
+		}
+
+		binary_heap(self&&x) :
+			heap_v(std::move(x.heap_v)), comp(x.comp)
+		{
 		}
 
 		self& operator=(const self& x)
 		{
 			heap_v = x.heap_v;
 			comp = x.comp;
-			return *this;
+			return (*this);
+		}
+
+		self& operator=(self&&x)
+		{
+			heap_v = std::move(x.heap_v);
+			comp = std::move(x.comp);
+			return (*this);
 		}
 
 		bool empty()const

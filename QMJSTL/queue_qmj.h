@@ -29,6 +29,11 @@ namespace qmj
 		{
 		}
 
+		explicit queue(Container&& cont) :
+			c(std::move(cont))
+		{
+		}
+
 		template<typename Iter>
 		queue(Iter first, Iter last) :
 			c(first, last)
@@ -43,6 +48,12 @@ namespace qmj
 		self& operator=(const self&x)
 		{
 			c = x.c;
+			return (*this);
+		}
+
+		self& operator=(self&&x)
+		{
+			c = std::move(x.c);
 			return (*this);
 		}
 
@@ -86,6 +97,17 @@ namespace qmj
 			c.push_back(val);
 		}
 
+		void push(value_type&&val)
+		{
+			c.push(std::move(val));
+		}
+
+		template<typename...types>
+		void emplace(types&&...args)
+		{
+			c.emplace_back(std::forward<types>(args)...);
+		}
+
 		void pop()
 		{
 			c.pop_front();
@@ -95,7 +117,7 @@ namespace qmj
 		{
 			value_type ret = c.front();
 			c.pop_front();
-			return ret;
+			return (ret);
 		}
 
 		const Container& _get_container()const
@@ -160,15 +182,15 @@ namespace qmj
 namespace qmj
 {
 	template<typename value_type,
-		typename Container=_QMJ vector<value_type>,
-		typename Compare=std::less<value_type>>
-		class priority_queue:
-		public binary_heap<value_type,Container,Compare>
+		typename Container = _QMJ vector<value_type>,
+		typename Compare = std::less<value_type>>
+		class priority_queue :
+		public binary_heap<value_type, Container, Compare>
 	{
 	public:
-		typedef priority_queue<value_type,Container,Compare> self;
+		typedef priority_queue<value_type, Container, Compare> self;
 		typedef Container container_type;
-		typedef binary_heap<value_type,Container, Compare> my_base;
+		typedef binary_heap<value_type, Container, Compare> my_base;
 
 		typedef typename container_type::value_type value_type;
 		typedef typename container_type::size_type size_type;
@@ -198,7 +220,7 @@ namespace qmj
 
 		template<typename Iter>
 		priority_queue(Iter first, Iter last, const Compare&comp) :
-			my_base(first, last,comp)
+			my_base(first, last, comp)
 		{
 		}
 
@@ -209,9 +231,25 @@ namespace qmj
 		{
 		}
 
+		priority_queue(const self&x) :
+			my_base(x)
+		{
+		}
+
+		priority_queue(self&&x) :
+			my_base(std::move(x))
+		{
+		}
+
 		self& operator=(const self&x)
 		{
 			my_base::operator=(x);
+			return (*this);
+		}
+
+		self& operator=(self&&x)
+		{
+			my_base::operator=(std::move(x));
 			return (*this);
 		}
 	};
