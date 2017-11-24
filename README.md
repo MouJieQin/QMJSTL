@@ -11,14 +11,16 @@
 **=============转载请注明出处=============**
 
 ## 内存池
-分配器在`allocator.h`中,第一级配置器使用`malloc-free`作为分配
+
+[allocator](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/allocator.h)
+
+第一级配置器使用`malloc-free`作为分配
 释放器.第二级分配器使用内存池,对于请求大于128字节的,第二级分配器
 直接调用第一级分配器.这两级配置器的程序照搬自<<stl源码剖析>>的
 SGI的某一版实现.
 
-### 优点:使用内存池后能显著提高某些容器的速度,如链表.
-### 缺点:该内存池对于小于128 bytes的内存并不归还给系统,
-总是保留内存高峰期的使用内存.像一个体温计.
+#### 优点:使用内存池后能显著提高某些容器的速度,如链表.
+#### 缺点:该内存池对于小于128 bytes的内存并不归还给系统,总是保留内存高峰期的使用内存.像一个体温计.
 
 针对这一点该头文件提供两个分配器,一个是qmj容器的默认内存分配器`allocator`,使用二级分配器.
 另一个是`simple_allocator`使用一级分配器.这两个分配器都**不符合标准**.
@@ -31,9 +33,10 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 	
 ![rb_tree](https://github.com/MouJieQin/QMJSTL/blob/master/image/RB_tree/RB_tree%20for%20map.png)
 
-为`qmj::map`和`qmj::set`基类,在文件`rb_tree.h`中,树中所有叶节点和
-少子节点(没有左节点或右节点)的空闲指针以及根节点的父节点都指向
-名为`NIL`的黑色节点.
+文件[rb_tree.h](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/rb_tree.h)
+
+为`qmj::map`和`qmj::set`基类,树中所有叶节点和少子节点
+(没有左节点或右节点)的空闲指针以及根节点的父节点都指向名为`NIL`的黑色节点.
 
 1.在插入和删除中始终维护`NIL`的父节点的为空,以作为`NIL`的标识,左节点
 指向树中的最大节点,右节点指向最小节点,这可让迭代器递增递减算法
@@ -71,7 +74,9 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 ***图中的桶是连续内存***
 
-`qmj::unordered_map`和`qmj::unordered_set`的基类,在文件`hashtable.h`中.
+文件[hashtable.h](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/hashtable.h)
+
+`qmj::unordered_map`和`qmj::unordered_set`的基类,
 对于`qmj::hashtable::equal_range(key)`,该函数返回表中关键字`key`所在
 的区间迭代器,我使用的算法是在调用该算法时才改变内部结构,让在一个桶中
 具有关键字`key`的节点连在一起.这样做的优点是加速插入,缺点是如果多次
@@ -125,7 +130,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 	
 ## vector
 
-在文件`vector_qmj.h`中
+[vector](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/vector_qmj.h)
 
 ![vector](https://github.com/MouJieQin/QMJSTL/blob/master/image/vector/vector.png)
 
@@ -133,6 +138,8 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 会全部进行构造,而`qmj::vector`只构造`qmj::vector::size`大小的内存
 
 ## list/forward_list/slist
+
+[list/forward_list/slist](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/list_qmj.h)
 
 1.`slist`不是单向链表,`list`继承自`slist`,不同之处在于`slist::splice`
 复杂度`O(1)`,`slist::size()`复杂度`O(n)`.而`qmj::list::splice`复杂度`O(n)`,
@@ -149,6 +156,8 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 返回值为排好序区间的首迭代器.`forward_list`也使用了归并排序
 	
 ## deque
+
+[deque](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/deque_qmj.h)
 
 ![std::deque](https://github.com/MouJieQin/QMJSTL/blob/master/image/deque/std__deque.png)
 
@@ -190,7 +199,9 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 ## priority_queue/fib_heap
 
-`binary_heap/fib_heap`在文件`heap.h`中,`qmj::priority_queue`在文件`queue_qmj.h`中
+[binary_heap/fib_hip](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/heap.h)
+
+[queue](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/queue_qmj.h)
 
 ### binary_heap
 
@@ -236,13 +247,17 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 ## algorithm
 
+[algorithm](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/algorithm_qmj.h)
+
 `qmj`没有完成的函数有`equal`,`copy`,`copy_backward`,`fill`等,
 原因在于看了`std`源码以后发现这些算法已经优化到了极致,
 重写一遍还要造很多型别判定的轮子,可能后面会补上.
 
 ### power
 
-`qmj::power(x,n,fn2)`在文件`numeric_qmj.h`中,是非标准算法.
+[numeric](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/numeric_qmj.h)
+
+`qmj::power(x,n,fn2)`是非标准算法.
 该算法返回对`x`进行`fn2`操作的`n`幂次方,`fn2`要满足结合律而
 不需满足交换律,其中`n`必须是非负整数,复杂度`O(lg(n))`.
 
@@ -374,11 +389,11 @@ std,否则调用成员函数.
 
 求序列的下一个(上一个)排列.
 
-***首先,从最尾端开始往前寻找两个相邻元素,令第一元素为`*i`,第二元素为`*ii`,且
-满足`*i<*ii`.找到这样一组相邻元素后,再从尾端开始往前检验,找出第一个大于
-`*i`的元素,令为`*j`,将`i,j`元素对调,再将`ii`之后的所有元素颠倒排列,此即所求之
-"下一个"排列组合.*** 
-                              -------- **<<stl源码剖析>>** 
+> 首先,从最尾端开始往前寻找两个相邻元素,令第一元素为`*i`,第二元素为`*ii`,且
+> 满足`*i<*ii`.找到这样一组相邻元素后,再从尾端开始往前检验,找出第一个大于
+> `*i`的元素,令为`*j`,将`i,j`元素对调,再将`ii`之后的所有元素颠倒排列,此即所求之
+> "下一个"排列组合.
+>                              -------- <<stl源码剖析>>
 	
 ![next_permutation](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/next_permutation.png)
 
