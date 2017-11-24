@@ -479,11 +479,64 @@ qmj并没有重新实现这一个函数.
 终止:`cur=last`.`*first`是`[first,last)`个元素中第`middle-first`小的元素.
 由堆的性质`[first,middle)`是`[first,last)`中`middle-first`个最小的元素.
 
+### sort
 
+`qmj::sort` 采用了`introSort`,主体采用循环加递归的快速排序.如果递归恶化(深度过深)会采用
+堆排序,如果序列长度低于阈值退出.最后对整个序列进行插入排序.以下是测试结果.
 
+![sort random](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/sort%20random.png)
 
+***随机不重复int数据***
 
+![sort sorted](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/sort%20sorted.png)
 
+***有序(增序/降序)不重复数据****
+
+![sort multi](https://github.com/MouJieQin/QMJSTL/blob/master/image/algorithm/sort%20multi.png)
+
+***完全重复数据***
+
+`qmj::sort`在不重复数据比`std::sort`表现更好的一个原因在于
+
+		template<typename RIter,
+		typename Comp>inline
+		RIter _mid_partition(RIter first, RIter last,
+			const Comp&cmp)
+	{
+		iter_val_t<RIter> piovt = _get_piovt(
+			*first, *(first + ((size_t)(last - first) >> 1)), *(last - 1), cmp);
+		for (;; ++first)
+		{
+			for (; cmp(*first, piovt); ++first)
+				;
+
+			for (--last; cmp(piovt, *last); --last)
+				;
+
+			if (!(first < last))
+				return (first);
+			_QMJ iter_swap(first, last);
+		}
+		return (first);
+	}
+	
+在两个比对`piovt`循环体中没有边界检查,节省了很多常数时间.但这也是`qmj:sort`在面对完全重复数据时
+表现不如`std::sort`的原因.`std::sort`的`mid_partition`返回一个`pair`表示`piovt`的所在区间.当数据
+完全重复时`std::sort`复杂度为`O(n)`.而`qmj::sort`的`mid_partition`要做很多无用的交换.
+经过测试,即使序列有超过一半的重复的元素,但如果序列是随机排列的`qmj::sort`还是比`std::sort`
+具有更好的性能.
+
+`for (; cmp(*first, piovt); ++first)`不需要边界检查的原因在于`piovt`是区间中的一个元素.
+该循环一定会在越界之前停下来.第二个循环也是如此.而后检查两个迭代器的位置,如果不满足
+要求直接返回.而满足要求后会交换两个对象,一旦交换后就很显然不需要担心越界问题了.
+
+#### 复杂度分析:
+
+`qmj::sort`对递归深度有限制,一旦递归恶化(复杂度偏向`O(n^2)`)便调用堆排序.保证了复杂度`O(nlgn)`,
+对于最后进行的一次插入排序,也可证明是`O(n)`的.原因在于原序列被划分成了不大于阈值的若干个区间,
+每个区间的元素虽然不一定是有序的,但该区间与其他区间是独立的,该区间的元素是整个序列有序后该区间
+元素的一个排列.这便保证了插入排序内层循环的花费不会超过阈值.随意复杂度`O(n`).整个算法的复杂度
+`O(nlgn)`.
 
 
 
