@@ -15,7 +15,7 @@
 [allocator](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/allocator.h)
 
 第一级配置器使用`malloc-free`作为分配
-释放器.第二级分配器使用内存池,对于请求大于128字节的,第二级分配器
+释放器.第二级分配器使用内存池,对于大于128字节的请求,第二级分配器
 直接调用第一级分配器.这两级配置器的程序照搬自<<stl源码剖析>>的
 SGI的某一版实现.
 
@@ -99,7 +99,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 `qmj::unorder_multi(set/map)::operator==` 和`access`(遍历)慢很多,`operator==`慢
 一是因为遍历慢,二是因为`equal_range`每次都要遍历桶中全部元素.
 `operator==`使用了`qmj::is_permutation`,该算法确定第一个区间
-是否是第二个区间的排列组合,复杂度`O(n^2)`.隐藏在其中的常数非常大,
+是否是第二个区间的排列,复杂度`O(n^2)`.隐藏在其中的常数非常大,
 如果直接使用该算法是没有用处的.但是`hashtable::equal_range`是常数时间,
 所以`operator==`对两个`hashtable::equal_range`里的元素区间进行比较,
 一般桶里的元素数目为常数,所以整个算法复杂度为`O(n)`.
@@ -130,17 +130,17 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 ## AVL_tree
 
-[AVl_tree]()
+[AVl_tree](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/AVL_tree.h)
 
 `qmj::avl_tree` 将`AVL_tree`的递归回溯插入法优化成循环上溯插入法.`qmj::avl_tree`的插入和删除采用了
 和`qmj::rb_tree`相同的模式,先完成插入(删除),然后上溯维护树高.
 
-`qmj::avl_tree::insert` 优化点:
+### `qmj::avl_tree::insert` 优化点:
 首先完成节点插入,上溯修复过程在不改变当前节点的高度或完成旋转后退出而不是上溯到根节点.
 容易证明旋转后近根节点的高度不会改变其父节点的高度.其`insert`和`delete`操作中旋转操作中的
 节点改变操作不同.`insert`的旋转操作更加细化,不证明.
 
-`qmj::avl_tree::erase`/(亦即`delete`)优化点:
+### `qmj::avl_tree::erase`/(亦即`delete`)优化点:
 在完成旋转操作或不改变当前节点高度后退出.由于删除操作是我思考出来的,所以主要讲删除操作.
 
 和删除普通二叉搜索树的节点类似,`qmj::avl_tree::erase`面对四种情况.
@@ -150,6 +150,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 第一二种情况比较简单,如果要删除的节点的只有一个子节点,就用这个子节点代替它,关键节点为其
 父节点,所谓关键节点就是删除节点后可能改变高度的第一个节点.对于没有子节点的节点可以归为
 第一种情况中.
+
 对于有左右子树的节点,取其右子树中的最小节点代替它.此时分为三四种情况.
 对于右子树中最小节点为其右节点视为情况三.让其右节点代替它.与第一二种
 情况的不同之处在于此时关键节点不是删除节点的父节点而是其右节点.
@@ -161,6 +162,17 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 ![avl_tree](https://github.com/MouJieQin/QMJSTL/blob/master/image/avl_tree/avl_tree%20random.png)
 
 `qmj::avl_tree`能够达到和`qmj::multiset`相同的性能,当然,`qmj::avl_tree`没有封装带来的间接性.
+
+## splay_tree
+
+[splay_tree](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/splay_tree.h)
+
+splay_tree适用于需要多次查找最近查找过得元素,因为每次find后会将最接近查找元素的树
+中元素上升到根节点,平摊时间为O(lgn).splay_tree占用的内存较小.和双向链表相当.由于不能
+保证是平衡树,所以遍历是使用递归可能栈溢出,特别是数据量较大时.我写了一个"一次性"遍历
+算法,因为会破坏树的结构,但因为只是用在析构上,所以是否一次性无所谓.具体思想是将栈结构
+组织到树上.
+
 	
 ## vector
 
@@ -169,7 +181,8 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 ![vector](https://github.com/MouJieQin/QMJSTL/blob/master/image/vector/vector.png)
 
 比`std::vector`快的原因在于`std::vector`使用`new`对于预分配的内存
-会全部进行构造,而`qmj::vector`只构造`qmj::vector::size`大小的内存
+会全部进行构造,而`qmj::vector`只构造`qmj::vector::size`大小的内存.
+算法复杂度,摊还时间为`O(1)`.
 
 ## list/forward_list/slist
 
@@ -233,7 +246,7 @@ qmj::各容器虽然都提供有自定义内存分配器模板参数,但不提�
 
 ## priority_queue/fib_heap
 
-[binary_heap/fib_hip](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/heap.h)
+[binary_heap/fib_heap](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/heap.h)
 
 [queue](https://github.com/MouJieQin/QMJSTL/blob/master/QMJSTL/queue_qmj.h)
 
