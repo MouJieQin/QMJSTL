@@ -1,258 +1,169 @@
 #pragma once
 #ifndef _QUEUE_QMJ_
 #define _QUEUE_QMJ_
-#include"deque_qmj.h"
-#include"heap.h"
+#include "deque_qmj.h"
+#include "heap.h"
 
-namespace qmj
-{
-	template<typename value_type,
-		typename Container = _QMJ deque<value_type>>
-		class queue
-	{
-	public:
-		typedef typename Container container_type;
-		typedef typename  container_type::value_type value_type;
-		typedef typename container_type::size_type size_type;
-		typedef typename container_type::reference reference;
-		typedef typename container_type::const_reference const_reference;
+namespace qmj {
+template <typename value_type, typename Container = _QMJ deque<value_type>>
+class queue {
+ public:
+  typedef typename Container container_type;
+  typedef typename container_type::value_type value_type;
+  typedef typename container_type::size_type size_type;
+  typedef typename container_type::reference reference;
+  typedef typename container_type::const_reference const_reference;
 
-		typedef queue<value_type, Container> self;
+  typedef queue<value_type, Container> self;
 
-		queue() :
-			c()
-		{
-		}
+  queue() : c() {}
 
-		explicit queue(const Container&cont) :
-			c(cont)
-		{
-		}
+  explicit queue(const Container& cont) : c(cont) {}
 
-		explicit queue(Container&& cont) :
-			c(std::move(cont))
-		{
-		}
+  explicit queue(Container&& cont) : c(std::move(cont)) {}
 
-		template<typename Iter>
-		queue(Iter first, Iter last) :
-			c(first, last)
-		{
-		}
+  template <typename Iter>
+  queue(Iter first, Iter last) : c(first, last) {}
 
-		queue(const self&x) :
-			c(x.c)
-		{
-		}
+  queue(const self& x) : c(x.c) {}
 
-		self& operator=(const self&x)
-		{
-			c = x.c;
-			return (*this);
-		}
+  self& operator=(const self& x) {
+    c = x.c;
+    return (*this);
+  }
 
-		self& operator=(self&&x)
-		{
-			c = std::move(x.c);
-			return (*this);
-		}
+  self& operator=(self&& x) {
+    c = std::move(x.c);
+    return (*this);
+  }
 
-		void swap(self&x)noexcept
-		{
-			swap(c, x.c);
-		}
+  void swap(self& x) noexcept { swap(c, x.c); }
 
-		bool empty()const
-		{
-			return c.empty();
-		}
+  bool empty() const { return c.empty(); }
 
-		size_t size()const
-		{
-			return c.size();
-		}
+  size_t size() const { return c.size(); }
 
-		reference front()
-		{
-			return c.front();
-		}
+  reference front() { return c.front(); }
 
-		const_reference front()const
-		{
-			return c.front();
-		}
+  const_reference front() const { return c.front(); }
 
-		reference back()
-		{
-			return c.back();
-		}
+  reference back() { return c.back(); }
 
-		const_reference back()const
-		{
-			return c.back();
-		}
+  const_reference back() const { return c.back(); }
 
-		void push(const value_type&val)
-		{
-			c.push_back(val);
-		}
+  void push(const value_type& val) { c.push_back(val); }
 
-		void push(value_type&&val)
-		{
-			c.push(std::move(val));
-		}
+  void push(value_type&& val) { c.push(std::move(val)); }
 
-		template<typename...types>
-		void emplace(types&&...args)
-		{
-			c.emplace_back(std::forward<types>(args)...);
-		}
+  template <typename... types>
+  void emplace(types&&... args) {
+    c.emplace_back(std::forward<types>(args)...);
+  }
 
-		void pop()
-		{
-			c.pop_front();
-		}
+  void pop() { c.pop_front(); }
 
-		value_type pop_front()
-		{
-			value_type ret = c.front();
-			c.pop_front();
-			return (ret);
-		}
+  value_type pop_front() {
+    value_type ret = c.front();
+    c.pop_front();
+    return (ret);
+  }
 
-		const Container& _get_container()const
-		{
-			return c;
-		}
+  const Container& _get_container() const { return c; }
 
-	private:
-		Container c;
-	};
+ private:
+  Container c;
+};
 
-	template<typename value_type, typename Container>inline
-		void swap(const _QMJ queue<value_type, Container>&left,
-			const _QMJ queue<value_type, Container>&right)noexcept
-	{
-		left.swap(right);
-	}
-
-	template<typename value_type, typename Container>inline
-		bool operator==(const _QMJ queue<value_type, Container>&left,
-			const _QMJ queue<value_type, Container>&right)
-	{
-		return (left._get_constainer() == right._get_constainer());
-	}
-
-	template<typename value_type, typename Container>inline
-		bool operator!=(const _QMJ queue<value_type, Container>&left,
-			const _QMJ queue<value_type, Container>&right)
-	{
-		return (left._get_constainer() != right._get_constainer());
-	}
-
-	template<typename value_type, typename Container>inline
-		bool operator<(const _QMJ queue<value_type, Container>&left,
-			const _QMJ queue<value_type, Container>&right)
-	{
-		return (left._get_constainer() < right._get_constainer());
-	}
-
-	template<typename value_type, typename Container>inline
-		bool operator<=(const _QMJ queue<value_type, Container>&left,
-			const _QMJ queue<value_type, Container>&right)
-	{
-		return (left._get_constainer() <= right._get_constainer());
-	}
-
-	template<typename value_type, typename Container>inline
-		bool operator>(const _QMJ queue<value_type, Container>&left,
-			const _QMJ queue<value_type, Container>&right)
-	{
-		return (left._get_constainer() > right._get_constainer());
-	}
-
-	template<typename value_type, typename Container>inline
-		bool operator>=(const _QMJ queue<value_type, Container>&left,
-			const _QMJ queue<value_type, Container>&right)
-	{
-		return (left._get_constainer() >= right._get_constainer());
-	}
+template <typename value_type, typename Container>
+inline void swap(const _QMJ queue<value_type, Container>& left,
+                 const _QMJ queue<value_type, Container>& right) noexcept {
+  left.swap(right);
 }
 
-namespace qmj
-{
-	template<typename value_type,
-		typename Container = _QMJ vector<value_type>,
-		typename Compare = std::less<value_type>>
-		class priority_queue :
-		public binary_heap<value_type, Container, Compare>
-	{
-	public:
-		typedef priority_queue<value_type, Container, Compare> self;
-		typedef Container container_type;
-		typedef binary_heap<value_type, Container, Compare> my_base;
+template <typename value_type, typename Container>
+inline bool operator==(const _QMJ queue<value_type, Container>& left,
+                       const _QMJ queue<value_type, Container>& right) {
+  return (left._get_constainer() == right._get_constainer());
+}
 
-		typedef typename container_type::value_type value_type;
-		typedef typename container_type::size_type size_type;
-		typedef typename container_type::reference reference;
-		typedef typename container_type::const_reference const_reference;
+template <typename value_type, typename Container>
+inline bool operator!=(const _QMJ queue<value_type, Container>& left,
+                       const _QMJ queue<value_type, Container>& right) {
+  return (left._get_constainer() != right._get_constainer());
+}
 
-		priority_queue() :
-			my_base()
-		{
-		}
+template <typename value_type, typename Container>
+inline bool operator<(const _QMJ queue<value_type, Container>& left,
+                      const _QMJ queue<value_type, Container>& right) {
+  return (left._get_constainer() < right._get_constainer());
+}
 
-		explicit priority_queue(const Compare&comp) :
-			my_base(comp)
-		{
-		}
+template <typename value_type, typename Container>
+inline bool operator<=(const _QMJ queue<value_type, Container>& left,
+                       const _QMJ queue<value_type, Container>& right) {
+  return (left._get_constainer() <= right._get_constainer());
+}
 
-		priority_queue(const Compare&comp, const Container&cont) :
-			my_base(cont, comp)
-		{
-		}
+template <typename value_type, typename Container>
+inline bool operator>(const _QMJ queue<value_type, Container>& left,
+                      const _QMJ queue<value_type, Container>& right) {
+  return (left._get_constainer() > right._get_constainer());
+}
 
-		template<typename Iter>
-		priority_queue(Iter first, Iter last) :
-			my_base(first, last)
-		{
-		}
+template <typename value_type, typename Container>
+inline bool operator>=(const _QMJ queue<value_type, Container>& left,
+                       const _QMJ queue<value_type, Container>& right) {
+  return (left._get_constainer() >= right._get_constainer());
+}
+}
 
-		template<typename Iter>
-		priority_queue(Iter first, Iter last, const Compare&comp) :
-			my_base(first, last, comp)
-		{
-		}
+namespace qmj {
+template <typename value_type, typename Container = _QMJ vector<value_type>,
+          typename Compare = std::less<value_type>>
+class priority_queue : public binary_heap<value_type, Container, Compare> {
+ public:
+  typedef priority_queue<value_type, Container, Compare> self;
+  typedef Container container_type;
+  typedef binary_heap<value_type, Container, Compare> my_base;
 
-		template<typename Iter>
-		priority_queue
-		(Iter first, Iter last, const Compare&comp, const Container&cont) :
-			my_base(first, last, cont, comp)
-		{
-		}
+  typedef typename container_type::value_type value_type;
+  typedef typename container_type::size_type size_type;
+  typedef typename container_type::reference reference;
+  typedef typename container_type::const_reference const_reference;
 
-		priority_queue(const self&x) :
-			my_base(x)
-		{
-		}
+  priority_queue() : my_base() {}
 
-		priority_queue(self&&x) :
-			my_base(std::move(x))
-		{
-		}
+  explicit priority_queue(const Compare& comp) : my_base(comp) {}
 
-		self& operator=(const self&x)
-		{
-			my_base::operator=(x);
-			return (*this);
-		}
+  priority_queue(const Compare& comp, const Container& cont)
+      : my_base(cont, comp) {}
 
-		self& operator=(self&&x)
-		{
-			my_base::operator=(std::move(x));
-			return (*this);
-		}
-	};
+  template <typename Iter>
+  priority_queue(Iter first, Iter last) : my_base(first, last) {}
+
+  template <typename Iter>
+  priority_queue(Iter first, Iter last, const Compare& comp)
+      : my_base(first, last, comp) {}
+
+  template <typename Iter>
+  priority_queue(Iter first, Iter last, const Compare& comp,
+                 const Container& cont)
+      : my_base(first, last, cont, comp) {}
+
+  priority_queue(const self& x) : my_base(x) {}
+
+  priority_queue(self&& x) : my_base(std::move(x)) {}
+
+  self& operator=(const self& x) {
+    my_base::operator=(x);
+    return (*this);
+  }
+
+  self& operator=(self&& x) {
+    my_base::operator=(std::move(x));
+    return (*this);
+  }
+};
 }
 
 #endif
