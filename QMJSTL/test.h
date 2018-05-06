@@ -87,7 +87,7 @@ for(size_t i = 0; i < vt_time.size(); ++i) \
          << "\t";                                                              \
     cout << "faster: " << vt_time[i].std_time - vt_time[i].qmj_time << "ms";   \
     if (vt_time[i].std_time) {                                                 \
-      cout << "\tËÙ¶ÈÌá¸ß£º "                                                  \
+      cout << "\té€Ÿåº¦æé«˜ï¼š "                                                  \
            << (vt_time[i].std_time - vt_time[i].qmj_time) /                    \
                   static_cast<double>(vt_time[i].std_time) * 100               \
            << "%";                                                             \
@@ -105,7 +105,7 @@ cout << second_name                                                            \
   \
 if(total_time_std) \
 {                                                        \
-    cout << "ËÙ¶ÈÌá¸ß£º "                                                      \
+    cout << "é€Ÿåº¦æé«˜ï¼š "                                                      \
          << (total_time_std - total_time_qmj) /                                \
                 static_cast<double>(total_time_std) * 100                      \
          << "%\n----------------" << endl;                                     \

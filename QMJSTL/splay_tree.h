@@ -80,7 +80,7 @@ class splay_tree {
     } while (!stk.empty() || cur != nil);
   }
 
-  void inorder_walk(int) {  // no stack,Morris±éÀú
+  void inorder_walk(int) {  // no stack,Morriséå†
     link_type par = root;
     link_type left;
     while (par != nil) {

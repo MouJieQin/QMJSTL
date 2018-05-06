@@ -2,11 +2,11 @@
 #ifndef _HEAP_
 #define _HEAP_
 #include "vector_qmj.h"
-/*¶ş²æ¶ÑºÍì³²¨ÄÇÆõ¶Ñ*/
+/*äºŒå‰å †å’Œæ–æ³¢é‚£å¥‘å †*/
 namespace qmj {
 template <typename value_type, typename Container = _QMJ vector<value_type>,
           typename Compare = std::less<value_type>>
-class binary_heap {  //¶ş²æ×î´ó/×îĞ¡¶Ñ
+class binary_heap {  //äºŒå‰æœ€å¤§/æœ€å°å †
  public:
   typedef Container container_type;
   typedef value_type value_type;
@@ -74,7 +74,7 @@ class binary_heap {  //¶ş²æ×î´ó/×îĞ¡¶Ñ
     heapify(0);
   }
 
-  value_type pop_top() {  //·µ»Ø¶¥¶ËÔªËØ²¢ÈÃÆä³ö¶Ó
+  value_type pop_top() {  //è¿”å›é¡¶ç«¯å…ƒç´ å¹¶è®©å…¶å‡ºé˜Ÿ
     value_type top = heap_v[0];
     heap_v[0] = heap_v.back();
     heap_v.pop_back();
@@ -84,7 +84,7 @@ class binary_heap {  //¶ş²æ×î´ó/×îĞ¡¶Ñ
 
   void change_key(
       const size_t index,
-      const value_type& val) {  //ÊÓÇé¿ö(×î´ó¶Ñ/×îĞ¡¶Ñ)¸Ä±äÏÂ±êindexµÄ¼üÖµ²¢ÉÏËİ
+      const value_type& val) {  //è§†æƒ…å†µ(æœ€å¤§å †/æœ€å°å †)æ”¹å˜ä¸‹æ ‡indexçš„é”®å€¼å¹¶ä¸Šæº¯
     if (comp(heap_v[index], val)) return;
     change_key_imple(index, val);
   }
@@ -105,7 +105,7 @@ class binary_heap {  //¶ş²æ×î´ó/×îĞ¡¶Ñ
     heap_v[index] = val;
   }
 
-  void heapify(size_t index) {  //½«index½ÚµãÏÂËİ
+  void heapify(size_t index) {  //å°†indexèŠ‚ç‚¹ä¸‹æº¯
     const value_type val = heap_v[index];
     size_t right_index = right(index);
     const size_t len = heap_v.size();
@@ -130,12 +130,12 @@ class binary_heap {  //¶ş²æ×î´ó/×îĞ¡¶Ñ
   void build_heap() {
     size_t index = heap_v.size();
     if (index < 2) return;
-    for (index = parent(index) + 1;  //ÓĞ×Ó½ÚµãµÄ×î´óÏÂ±ê½Úµã+1
+    for (index = parent(index) + 1;  //æœ‰å­èŠ‚ç‚¹çš„æœ€å¤§ä¸‹æ ‡èŠ‚ç‚¹+1
          index != 0;)
       heapify(--index);
   }
 
-  //·µ»Ø×óÓÒº¢×Ó»ò¸¸½ÚµãÏÂ±ê
+  //è¿”å›å·¦å³å­©å­æˆ–çˆ¶èŠ‚ç‚¹ä¸‹æ ‡
   size_t left(const size_t index) { return (index << 1) + 1; }
 
   size_t right(const size_t index) { return (index << 1) + 2; }
@@ -177,7 +177,7 @@ struct fib_heap_node {
 template <typename value_type,
           typename Compare = std::less<typename value_type>,
           typename Alloc = _QMJ allocator<value_type>>
-class fib_heap {  //ì³²¨ÄÇÆõ×î´ó/×îĞ¡¶Ñ
+class fib_heap {  //æ–æ³¢é‚£å¥‘æœ€å¤§/æœ€å°å †
  public:
   typedef value_type value_type;
   typedef value_type* pointer;
@@ -204,7 +204,7 @@ class fib_heap {  //ì³²¨ÄÇÆõ×î´ó/×îĞ¡¶Ñ
   template <typename FowardIterator>
   fib_heap(
       FowardIterator first, FowardIterator last,
-      _QMJ vector<link_type>& map,  //ÕâÖÖÓ³Éä¶ÑÖĞÍ¼ÖĞÖ¸ÕëµÄ·½Ê½¸øÍ¼Ëã·¨Ê¹ÓÃ
+      _QMJ vector<link_type>& map,  //è¿™ç§æ˜ å°„å †ä¸­å›¾ä¸­æŒ‡é’ˆçš„æ–¹å¼ç»™å›¾ç®—æ³•ä½¿ç”¨
       Compare comp = Compare())
       : fib_heap(comp) {
     while (first != last) insert(*first++, map);
@@ -295,7 +295,7 @@ class fib_heap {  //ì³²¨ÄÇÆõ×î´ó/×îĞ¡¶Ñ
     return (ret);
   }
 
-  void change_key(link_type tar)  //µ±ÔªËØÊÇÖ¸Õë£¬²¢ÇÒÒÑ¾­¸Ä±ä¸ÃÖ¸ÕëËùÖ¸¶ÔÏóµÄÖµ
+  void change_key(link_type tar)  //å½“å…ƒç´ æ˜¯æŒ‡é’ˆï¼Œå¹¶ä¸”å·²ç»æ”¹å˜è¯¥æŒ‡é’ˆæ‰€æŒ‡å¯¹è±¡çš„å€¼
   {
     auto k = tar->key;
     auto par = tar->p;
@@ -319,7 +319,7 @@ class fib_heap {  //ì³²¨ÄÇÆõ×î´ó/×îĞ¡¶Ñ
   }
 
  public:
-  void print_fib() {  //µ÷ÊÔÓÃ
+  void print_fib() {  //è°ƒè¯•ç”¨
     print(get_header());
   }
 

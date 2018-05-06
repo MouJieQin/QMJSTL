@@ -191,7 +191,7 @@ class avl_tree {
   }
 
   void delete_node(link_type tar) {
-    link_type node = tar->p;  //¹Ø¼ü½Úµã,É¾³ý½ÚµãºóÆä¸ß¶È¿ÉÄÜÐèÒªµ÷Õû
+    link_type node = tar->p;  //å…³é”®èŠ‚ç‚¹,åˆ é™¤èŠ‚ç‚¹åŽå…¶é«˜åº¦å¯èƒ½éœ€è¦è°ƒæ•´
     if (!tar->left)
       transplant(tar, tar->right);
     else if (!tar->right)
@@ -210,9 +210,9 @@ class avl_tree {
       instead->left = tar->left;
       instead->left->p = instead;
     }
-    if (!node)  //É¾³ýµÄtarÊÇ¸ù½Úµã
+    if (!node)  //åˆ é™¤çš„taræ˜¯æ ¹èŠ‚ç‚¹
       node = root;
-    if (node) {  // tar²»ÊÇÊ÷ÖÐµÄÎ¨Ò»½Úµã
+    if (node) {  // tarä¸æ˜¯æ ‘ä¸­çš„å”¯ä¸€èŠ‚ç‚¹
       node->height = 1 + max_height(node->left, node->right);
       delete_fixup(node);
     }
