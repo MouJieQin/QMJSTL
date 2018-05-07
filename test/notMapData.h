@@ -18,10 +18,33 @@ namespace test
 #define TEST_DATASIZE 100000
 
 template <typename ContainerA, typename ContainerB>
-bool operator==(const ContainerA &left, const ContainerB &right)
+bool _is_equal_imple(const ContainerA &left, const ContainerB &right,
+                     std::bidirectional_iterator_tag)
 {
     return (left.size() == right.size() &&
             std::equal(left.begin(), left.end(), right.begin()));
+}
+
+template <typename ContainerA, typename ContainerB>
+bool _is_equal_imple(const ContainerA &left, const ContainerB &right,
+                     std::forward_iterator_tag)
+{
+    try
+    {
+        return ((left.empty() && right.empty()) || std::equal(left.begin(),
+                                                              left.end(), right.begin()));
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return false;
+}
+
+template <typename ContainerA, typename ContainerB>
+bool is_equal(const ContainerA &left, const ContainerB &right)
+{
+    return _is_equal_imple(left, right, qmj::iterator_category(left.begin()));
 }
 
 template <typename Iter, typename Dif>
@@ -130,12 +153,19 @@ class Test_not_map_base : public testing::Test
         return create_data(data, new_size);
     }
 
-    bool is_equal() { return std_con == qmj_con; }
+    bool load_data()
+    {
+        return (this->reset_data(TEST_DATASIZE) && this->test_assign());
+    }
+
+    bool is_equal() { return qmj::test::is_equal(std_con, qmj_con); }
 
     void test_clear()
     {
         std_con.clear();
         qmj_con.clear();
+        EXPECT_TRUE(is_equal())
+            << "qmj::Container is not equal to std::Container after clear";
     }
 
     bool test_assign()
@@ -156,22 +186,13 @@ class Test_not_map_base : public testing::Test
         return result;
     }
 
-    void test_push_back()
+    void test_resize()
     {
-        try
-        {
-            for (const value_type &val : data)
-            {
-                std_con.push_back(val);
-                qmj_con.push_back(val);
-            }
-        }
-        catch (...)
-        {
-            ASSERT_TRUE(false) << "Container push_back error";
-        }
-        EXPECT_TRUE(is_equal())
-            << "qmj::Container is not equal to std::Container after push_back";
+        size_t len = qmj::distance(this->std_con.begin(), this->std_con.end());
+        size_t new_size = len / 4;
+        this->std_con.resize(new_size);
+        this->qmj_con.resize(new_size);
+        EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after resize";
     }
 
   protected:
@@ -189,11 +210,6 @@ class Test_not_map : public Test_not_map_base<STD_container, QMJ_container>
     typedef Test_not_map_base<STD_container, QMJ_container> base_type;
     Test_not_map() : base_type() {}
     ~Test_not_map() {}
-
-    bool load_data()
-    {
-        return (this->reset_data(TEST_DATASIZE) && this->test_assign());
-    }
 
     void test_erase()
     {
@@ -233,6 +249,24 @@ class Test_not_map : public Test_not_map_base<STD_container, QMJ_container>
             << "qmj::Container is not equal to std::Container after insert";
     }
 
+    void test_push_back()
+    {
+        try
+        {
+            for (const value_type &val : this->data)
+            {
+                this->std_con.push_back(val);
+                this->qmj_con.push_back(val);
+            }
+        }
+        catch (...)
+        {
+            ASSERT_TRUE(false) << "Container push_back error";
+        }
+        EXPECT_TRUE(this->is_equal())
+            << "qmj::Container is not equal to std::Container after push_back";
+    }
+
     void test_pop_back()
     {
         this->std_con.pop_back();
@@ -241,14 +275,6 @@ class Test_not_map : public Test_not_map_base<STD_container, QMJ_container>
             << "qmj::Container is not equal to std::Container after pop_back";
     }
 
-    void test_resize()
-    {
-        const size_t new_size = this->std_con.size() / 2;
-        this->std_con.resize(new_size);
-        this->qmj_con.resize(new_size);
-        EXPECT_TRUE(this->is_equal())
-            << "qmj::Container is not equal to std::Container after resize";
-    }
 };
 
 } // namespace qmj
