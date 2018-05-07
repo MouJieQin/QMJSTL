@@ -2,9 +2,12 @@
 #define _NOT_MAP_DATA_CREATE_
 
 #include <algorithm>
+#include <iterator>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "gtest/gtest.h"
 
 namespace qmj
 {
@@ -12,12 +15,20 @@ namespace test
 {
 
 #define MAXLEN_STRING 15
+#define TEST_DATASIZE 100000
 
 template <typename ContainerA, typename ContainerB>
 bool operator==(const ContainerA &left, const ContainerB &right)
 {
     return (left.size() == right.size() &&
             std::equal(left.begin(), left.end(), right.begin()));
+}
+
+template <typename Iter, typename Dif>
+Iter advance(Iter iter, Dif dif)
+{
+    std::advance(iter, dif);
+    return iter;
 }
 
 bool create_data(std::vector<int> &vec, const size_t data_size)
@@ -62,10 +73,10 @@ bool create_data(std::vector<std::string> &vec, const size_t data_size)
         {
             std::string cur_str = "";
             for (size_t j = 0; j != cur_len; ++j)
-                    cur_str += rand_char[k++];
-                   temp.push_back(std::move(cur_str));
-                if (++cur_len > MAXLEN_STRING)
-                    cur_len = 1;
+                cur_str += rand_char[k++];
+            temp.push_back(std::move(cur_str));
+            if (++cur_len > MAXLEN_STRING)
+                cur_len = 1;
         }
         std::random_shuffle(temp.begin(), temp.end());
         vec.swap(temp);
@@ -100,13 +111,13 @@ bool create_data(std::vector<std::pair<std::string, int>> &vec,
     return true;
 }
 
-template <typename Std_container, typename Qmj_container>
-class Test_not_map
+template <typename STD_container, typename QMJ_container>
+class Test_not_map_base : public testing::Test
 {
   public:
-    typedef typename Std_container::value_type value_type;
-    Test_not_map() : data_size(0) {}
-    ~Test_not_map() {}
+    typedef typename STD_container::value_type value_type;
+    Test_not_map_base() : data_size(0) {}
+    ~Test_not_map_base() {}
 
     bool reset_data(const size_t new_size)
     {
@@ -136,12 +147,12 @@ class Test_not_map
         }
         catch (...)
         {
-            EXPECT_TRUE(false) << "vector copy/assign error";
+            EXPECT_TRUE(false) << "copy/assign error";
             return false;
         }
         bool result = is_equal();
         EXPECT_TRUE(result)
-            << "qmj::vector is not equal to std::vector after copy";
+            << "qmj::Container is not equal to std::Container after copy/assign";
         return result;
     }
 
@@ -157,17 +168,87 @@ class Test_not_map
         }
         catch (...)
         {
-            ASSERT_TRUE(false) << "vector push_back error";
+            ASSERT_TRUE(false) << "Container push_back error";
         }
         EXPECT_TRUE(is_equal())
-            << "qmj::vector is not equal to std::vector after copy";
+            << "qmj::Container is not equal to std::Container after push_back";
     }
 
   protected:
     size_t data_size;
     std::vector<value_type> data;
-    Std_container std_con;
-    Qmj_container qmj_con;
+    STD_container std_con;
+    QMJ_container qmj_con;
+};
+
+template <typename STD_container, typename QMJ_container>
+class Test_not_map : public Test_not_map_base<STD_container, QMJ_container>
+{
+  public:
+    typedef typename STD_container::value_type value_type;
+    typedef Test_not_map_base<STD_container, QMJ_container> base_type;
+    Test_not_map() : base_type() {}
+    ~Test_not_map() {}
+
+    bool load_data()
+    {
+        return (this->reset_data(TEST_DATASIZE) && this->test_assign());
+    }
+
+    void test_erase()
+    {
+        try
+        {
+            size_t erase_first = this->std_con.size() / 4;
+            size_t erase_end = erase_first * 3;
+            this->std_con.erase(advance(this->std_con.begin(), erase_first),
+                                advance(this->std_con.begin(), erase_end));
+            this->qmj_con.erase(advance(this->qmj_con.begin(), erase_first),
+                                advance(this->qmj_con.begin(), erase_end));
+        }
+        catch (...)
+        {
+            ASSERT_TRUE(false) << "Container erase error";
+        }
+        EXPECT_TRUE(this->is_equal())
+            << "qmj::Container is not equal to std::Container after erase";
+    }
+
+    void test_insert()
+    {
+        try
+        {
+            std::vector<value_type> insert_data(10, value_type());
+            size_t insert_pos = this->data_size / 4;
+            this->std_con.insert(this->std_con.begin() + insert_pos,
+                                 insert_data.begin(), insert_data.end());
+            this->qmj_con.insert(this->qmj_con.begin() + insert_pos,
+                                 insert_data.begin(), insert_data.end());
+        }
+        catch (...)
+        {
+            ASSERT_TRUE(false) << "Container insert error";
+        }
+        EXPECT_TRUE(this->is_equal())
+            << "qmj::Container is not equal to std::Container after insert";
+    }
+
+    void test_pop_back()
+    {
+        this->std_con.pop_back();
+        this->qmj_con.pop_back();
+        EXPECT_TRUE(this->is_equal())
+            << "qmj::Container is not equal to std::Container after pop_back";
+    }
+
+    void test_resize()
+    {
+        const size_t new_size = this->std_con.size() / 2;
+        this->std_con.resize(new_size);
+        this->qmj_con.resize(new_size);
+        EXPECT_TRUE(this->is_equal())
+            << "qmj::Container is not equal to std::Container after resize";
+    }
 };
 
 } // namespace qmj
