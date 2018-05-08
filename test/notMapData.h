@@ -17,6 +17,14 @@ namespace test
 #define MAXLEN_STRING 15
 #define TEST_DATASIZE 100000
 
+template <typename Container>
+std::ostream &display(const Container &con)
+{
+    for (auto const &val : con)
+        std::cout << val << " ";
+    return std::cout;
+}
+
 template <typename ContainerA, typename ContainerB>
 bool _is_equal_imple(const ContainerA &left, const ContainerB &right,
                      std::bidirectional_iterator_tag)
@@ -274,9 +282,80 @@ class Test_not_map : public Test_not_map_base<STD_container, QMJ_container>
         EXPECT_TRUE(this->is_equal())
             << "qmj::Container is not equal to std::Container after pop_back";
     }
-
 };
 
-} // namespace qmj
+bool operator<(const std::pair<std::string, int> &left, const std::pair<std::string, int> &right)
+{
+    return left.first < right.first;
+}
+
+template <typename STD_container, typename QMJ_container>
+class Test_list_base
+    : public Test_not_map_base<STD_container, QMJ_container>
+{
+  public:
+    typedef typename STD_container::value_type value_type;
+    typedef Test_not_map_base<STD_container, QMJ_container> base_type;
+
+    Test_list_base() {}
+
+    ~Test_list_base() {}
+
+    void test_pop_front()
+    {
+        this->std_con.pop_front();
+        this->qmj_con.pop_front();
+        EXPECT_TRUE(this->is_equal()) << "qmj::Container is not equal to std::Container after pop_front";
+    }
+
+    void test_push_front()
+    {
+        this->std_con.push_front(value_type());
+        this->qmj_con.push_front(value_type());
+        EXPECT_TRUE(this->is_equal()) << "qmj::Container is not equal to std::Container after push_front";
+    }
+
+    auto get_pred(int)
+    {
+        return [](const value_type &val) { return (val & 1); };
+    }
+
+    auto get_pred(std::string)
+    {
+        return [](const std::string &val) { return (val.size() & 1); };
+    }
+
+    auto get_pred(std::pair<std::string, int>)
+    {
+        return [](const std::pair<std::string, int> &val) { return (val.second & 1); };
+    }
+
+    void test_remove_if()
+    {
+        auto pred = get_pred(value_type());
+        this->std_con.remove_if(pred);
+        this->qmj_con.remove_if(pred);
+        EXPECT_TRUE(this->is_equal()) << "qmj::Container is not equal to std::Container after remove_if";
+    }
+
+    void test_sort_merge_unique()
+    {
+        this->std_con.sort();
+        this->qmj_con.sort();
+        EXPECT_TRUE(this->is_equal()) << "qmj::Container is not equal to std::Container after sort";
+        STD_container std_cp(this->std_con);
+        QMJ_container qmj_cp(this->qmj_con);
+        this->std_con.merge(std_cp);
+        this->qmj_con.merge(qmj_cp);
+        EXPECT_TRUE(this->is_equal()) << "qmj::Container is not equal to std::Container after merge";
+        EXPECT_TRUE(is_equal(std_cp, qmj_cp)) << "qmj_cp is not equal to std_cp after merge";
+
+        this->std_con.unique();
+        this->qmj_con.unique();
+        EXPECT_TRUE(this->is_equal()) << "qmj::Container is not equal to std::Container after unique";
+    }
+};
+
 } // namespace test
+} // namespace qmj
 #endif //_NOT_MAP_DATA_CREATE_

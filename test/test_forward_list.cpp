@@ -9,20 +9,16 @@ namespace qmj
 namespace test
 {
 
-bool operator<(const std::pair<std::string, int> &left, const std::pair<std::string, int> &right)
-{
-    return left.first < right.first;
-}
-
-template <typename value_type_>
-class Test_forward_list
-    : public Test_not_map_base<std::forward_list<value_type_>,
-                               qmj::forward_list<value_type_>>
+template <typename value_type>
+class Test_forward_list : public Test_list_base<std::forward_list<value_type>,
+                                         qmj::forward_list<value_type>>
 {
   public:
-    typedef value_type_ value_type;
-    typedef Test_not_map_base<std::forward_list<value_type>, qmj::forward_list<value_type>> base_type;
-    Test_forward_list() {}
+    typedef Test_list_base<std::forward_list<value_type>,
+                           qmj::forward_list<value_type>>
+        base_type;
+    Test_forward_list() : base_type() {}
+
     ~Test_forward_list() {}
 
     void test_erase_after()
@@ -44,28 +40,6 @@ class Test_forward_list
         EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after insert_after";
     }
 
-    void test_pop_front()
-    {
-        this->std_con.pop_front();
-        this->qmj_con.pop_front();
-        EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after pop_front";
-    }
-
-    void test_push_front()
-    {
-        this->std_con.push_front(value_type());
-        this->qmj_con.push_front(value_type());
-        EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after push_front";
-    }
-
-    void test_remove_if()
-    {
-        auto is_odd = [](const value_type &val) { return false; };
-        this->std_con.remove_if(is_odd);
-        this->qmj_con.remove_if(is_odd);
-        EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after remove_if";
-    }
-
     void test_splice_after()
     {
         std::forward_list<value_type> std_splice(this->std_con);
@@ -82,23 +56,6 @@ class Test_forward_list
         EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after splice_after";
         EXPECT_TRUE(is_equal(std_splice, qmj_splice)) << "std_splice is not equal to qmj_splice after splice_after";
     }
-
-    void test_sort_merge_unique()
-    {
-        this->std_con.sort();
-        this->qmj_con.sort();
-        EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after sort";
-        std::forward_list<value_type> std_cp(this->std_con);
-        qmj::forward_list<value_type> qmj_cp(this->qmj_con);
-        this->std_con.merge(std_cp);
-        this->qmj_con.merge(qmj_cp);
-        EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after merge";
-        EXPECT_TRUE(is_equal(std_cp, qmj_cp)) << "qmj_cp is not equal to std_cp after merge";
-
-        this->std_con.unique();
-        this->qmj_con.unique();
-        EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after unique";
-    }
 };
 
 class Test_forward_list_int : public Test_forward_list<int>
@@ -113,7 +70,7 @@ class Test_forward_list_pair : public Test_forward_list<std::pair<std::string, i
 {
 };
 
-TEST_F(Test_forward_list_int, Test_copy)
+TEST_F(Test_forward_list_int, Test_assign)
 {
     ASSERT_TRUE(reset_data(TEST_DATASIZE)) << "reset data error";
     test_assign();
@@ -181,7 +138,7 @@ TEST_F(Test_forward_list_int, Test_all)
     test_sort_merge_unique();
 }
 
-TEST_F(Test_forward_list_string, Test_copy)
+TEST_F(Test_forward_list_string, Test_assign)
 {
     ASSERT_TRUE(reset_data(TEST_DATASIZE)) << "reset data error";
     test_assign();
@@ -249,7 +206,7 @@ TEST_F(Test_forward_list_string, Test_all)
     test_sort_merge_unique();
 }
 
-TEST_F(Test_forward_list_pair, Test_copy)
+TEST_F(Test_forward_list_pair, Test_assign)
 {
     ASSERT_TRUE(reset_data(TEST_DATASIZE)) << "reset data error";
     test_assign();

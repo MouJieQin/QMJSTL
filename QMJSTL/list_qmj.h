@@ -37,7 +37,7 @@ struct list_node : public list_base_node<value_type>
   value_type data;
 };
 
-template <typename value_type>
+template <typename value_type_>
 class list_const_iterator
 {
 public:
@@ -45,7 +45,7 @@ public:
   friend class slist;
 
   typedef std::bidirectional_iterator_tag iterator_category;
-  typedef value_type value_type;
+  typedef value_type_ value_type;
   typedef const value_type *pointer;
   typedef const value_type &reference;
   typedef ptrdiff_t difference_type;
@@ -105,12 +105,12 @@ protected:
   link_type node;
 };
 
-template <typename value_type>
-class list_iterator : public list_const_iterator<value_type>
+template <typename value_type_>
+class list_iterator : public list_const_iterator<value_type_>
 {
 public:
   typedef std::bidirectional_iterator_tag iterator_category;
-  typedef value_type value_type;
+  typedef value_type_ value_type;
   typedef value_type *pointer;
   typedef value_type &reference;
   typedef ptrdiff_t difference_type;
@@ -126,21 +126,21 @@ public:
 
   self &operator=(const self &x)
   {
-    node = x.node;
+    this->node = x.node;
     return (*this);
   }
 
-  bool operator==(const self &x) const { return node == x.node; }
+  bool operator==(const self &x) const { return this->node == x.node; }
 
   bool operator!=(const self &x) const { return !operator==(x); }
 
-  reference operator*() const { return node->data; }
+  reference operator*() const { return this->node->data; }
 
   pointer operator->() const { return &(operator*()); }
 
   self &operator++()
   {
-    node = node->next;
+    this->node = this->node->next;
     return *this;
   }
 
@@ -153,7 +153,7 @@ public:
 
   self &operator--()
   {
-    node = node->prev;
+    this->node = this->node->prev;
     return *this;
   }
 
@@ -165,22 +165,22 @@ public:
   }
 };
 
-template <typename value_type,
-          typename Alloc = _QMJ allocator<value_type>>
+template <typename value_type_,
+          typename Alloc = _QMJ allocator<value_type_>>
 class slist
 { // is bidirect list,not forward_list,splice is O(1),size is O(n)
 public:
-  typedef slist<value_type, Alloc> self;
+  typedef slist<value_type_, Alloc> self;
   typedef Alloc allocator_type;
-  typedef list_node<value_type> *link_type;
-  typedef typename allocator_type::template rebind<list_node<value_type>>::other
+  typedef list_node<value_type_> *link_type;
+  typedef typename allocator_type::template rebind<list_node<value_type_>>::other
       alloc;
-  typedef list_base_node<value_type> base_node_type;
+  typedef list_base_node<value_type_> base_node_type;
   typedef base_node_type *base_link_type;
   typedef typename allocator_type::template rebind<base_node_type>::other
       alloc_type;
 
-  typedef value_type value_type;
+  typedef value_type_ value_type;
   typedef value_type *pointer;
   typedef const value_type *const_pointer;
   typedef value_type &reference;
@@ -266,7 +266,7 @@ public:
 
   void resize(const size_type new_size, const value_type &val)
   {
-    const size_type n = size();
+    size_type n = size();
     if (n < new_size)
       insert_n(end(), n - new_size, val);
     else
@@ -451,7 +451,7 @@ public:
       transfer(pos, x.begin(), x.end());
   }
 
-  void splice(const_iterator pos, self &&x) { splice(pos, (self &)x) }
+  void splice(const_iterator pos, self &&x) { splice(pos, (self &)x); }
 
   void splice(const_iterator pos, self &&x, const_iterator first)
   {
@@ -745,23 +745,23 @@ inline bool operator>=(const _QMJ slist<value_type, alloc> &left,
 {
   return !(left < right);
 }
-}
+} // namespace qmj
 
 namespace qmj
 {
-template <typename value_type, typename Alloc = _QMJ allocator<value_type>>
-class list : public slist<value_type, Alloc>
+template <typename value_type_, typename Alloc = _QMJ allocator<value_type_>>
+class list : public slist<value_type_, Alloc>
 {
 public:
-  typedef list<value_type, Alloc> self;
-  typedef slist<value_type, Alloc> base_type;
+  typedef list<value_type_, Alloc> self;
+  typedef slist<value_type_, Alloc> base_type;
   typedef Alloc allocator_type;
-  typedef list_node<value_type> *link_type;
-  typedef _QMJ allocator<list_node<value_type>> alloc;
-  typedef list_base_node<value_type> base_node_type;
+  typedef list_node<value_type_> *link_type;
+  typedef _QMJ allocator<list_node<value_type_>> alloc;
+  typedef list_base_node<value_type_> base_node_type;
   typedef base_node_type *base_link_type;
 
-  typedef value_type value_type;
+  typedef value_type_ value_type;
   typedef value_type *pointer;
   typedef const value_type *const_pointer;
   typedef value_type &reference;
@@ -796,7 +796,7 @@ public:
     assign(lst.begin(), lst.end());
   }
 
-  list(const self &x) : list() { insert(begin(), x.begin(), x.end()); }
+  list(const self &x) : list() { insert(this->begin(), x.begin(), x.end()); }
 
   list(self &&x) : list()
   {
@@ -818,7 +818,7 @@ public:
 
   void swap(self &x) noexcept
   {
-    base_type::swap(node, x.node);
+    base_type::swap(this->node, x.node);
     std::swap(node_count, x.node_count);
   }
 
@@ -850,9 +850,9 @@ public:
     count_set(new_size);
   }
 
-  void pop_front() { erase(begin()); }
+  void pop_front() { erase(this->begin()); }
 
-  void pop_back() { erase(--end()); }
+  void pop_back() { erase(--this->end()); }
 
   void clear()
   {
@@ -865,11 +865,11 @@ public:
   template <typename Pred>
   void unique(const Pred &pred)
   {
-    auto first = begin();
-    auto last = end();
+    auto first = this->begin();
+    auto last = this->end();
     if (first == last)
       return;
-    auto next = begin();
+    auto next = this->begin();
     while (++next != last)
     {
       if (pred(*next, *first))
@@ -882,8 +882,8 @@ public:
 
   void remove(const value_type &val)
   {
-    auto first = begin();
-    auto last = end();
+    auto first = this->begin();
+    auto last = this->end();
     while (first != last)
     {
       if (*first == val)
@@ -896,8 +896,8 @@ public:
   template <typename Pred>
   void remove_if(const Pred &pred)
   {
-    iterator ed = end();
-    for (iterator bg = begin(); bg != ed;)
+    iterator ed = this->end();
+    for (iterator bg = this->begin(); bg != ed;)
       if (pred(*bg))
         bg = erase(bg);
       else
@@ -918,11 +918,11 @@ public:
   iterator insert(const_iterator pos, size_type n, const value_type &val)
   {
     const_iterator prev = pos;
-    if (prev == cbegin())
+    if (prev == this->cbegin())
     {
       base_type::insert_n(pos, n, val);
       increase(n);
-      return begin();
+      return this->begin();
     }
     else
     {
@@ -975,11 +975,11 @@ public:
     count_set(n);
   }
 
-  void push_back(const value_type &val) { insert_imple(end(), val); }
+  void push_back(const value_type &val) { insert_imple(this->end(), val); }
 
   void push_back(value_type &&val)
   {
-    insert_imple(end(), std::forward<value_type>(val));
+    insert_imple(this->end(), std::forward<value_type>(val));
   }
 
   bool empty() const { return (!(node_count)); }
@@ -992,11 +992,11 @@ public:
     {
       increase(x.size());
       transfer(pos, x.begin(), x.end());
-      x.count_set();
+      x.count_set(0);
     }
   }
 
-  void splice(const_iterator pos, self &&x) { splice(pos, (self &)x) }
+  void splice(const_iterator pos, self &&x) { splice(pos, (self &)x); }
 
   void splice(const_iterator pos, self &&x, const_iterator first)
   {
@@ -1012,7 +1012,7 @@ public:
       if (this != &lst)
       {
         increase();
-        x.decrease();
+        this->decrease();
       }
     }
   }
@@ -1026,11 +1026,10 @@ public:
   void splice(const_iterator pos, self &lst, const_iterator first,
               const_iterator last)
   {
-    if (first != pos)
+    if (first != pos && first != last)
     {
+      // the last iterator after insert finished,for count size
       const_iterator tmp = pos;
-      if (tmp != end())
-        ++tmp; // the last iterator after insert finished,for count size
       base_type::transfer(pos, first, last);
       if (this != &lst)
       {
@@ -1041,23 +1040,23 @@ public:
     }
   }
 
-  void push_front(const value_type &val) { insert_imple(begin(), val); }
+  void push_front(const value_type &val) { insert_imple(this->begin(), val); }
 
   void push_front(value_type &&val)
   {
-    insert_imple(begin(), std::forward<value_type>(val));
+    insert_imple(this->begin(), std::forward<value_type>(val));
   }
 
   template <typename... types>
   void emplace_front(types &&... args)
   {
-    insert_imple(begin(), std::forward<types>(args)...);
+    insert_imple(this->begin(), std::forward<types>(args)...);
   }
 
   template <typename... types>
   void emplace_back(types &&... args)
   {
-    insert_imple(end(), std::forward<types>(args)...);
+    insert_imple(this->end(), std::forward<types>(args)...);
   }
 
   template <typename... types>
@@ -1098,8 +1097,8 @@ private:
   template <typename Iter>
   void assign_imple(Iter first, Iter last, std::input_iterator_tag)
   {
-    iterator bg = begin();
-    iterator ed = end();
+    iterator bg = this->begin();
+    iterator ed = this->end();
     for (; bg != ed && first != last; ++first, ++bg)
       reuseNode(bg, *first);
     for (; first != last; ++first)
@@ -1111,10 +1110,10 @@ private:
   void assign_imple(Iter first, Iter last, std::random_access_iterator_tag)
   {
     size_type n = last - first;
-    iterator bg = begin();
-    iterator ed = end();
+    iterator bg = this->begin();
+    iterator ed = this->end();
     for (; bg != ed && n != 0; --n, ++first, ++bg)
-      reuseNode(bg, *first);
+      this->reuseNode(bg, *first);
     for (; n != 0; --n, ++first)
       insert_imple(bg, *first);
     erase(bg, ed);
@@ -1132,7 +1131,7 @@ private:
   void insert_range(const_iterator pos, Iter first, Iter last,
                     std::random_access_iterator_tag)
   {
-    const size_type num = last - first;
+    size_type num = last - first;
     for (; num != 0; --num, ++first)
       insert_imple(pos, *first);
   }
@@ -1197,6 +1196,6 @@ inline bool operator>=(const _QMJ list<value_type, alloc> &left,
 {
   return !(left < right);
 }
-}
+} // namespace qmj
 
 #endif
