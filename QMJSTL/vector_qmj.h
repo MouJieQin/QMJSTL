@@ -6,10 +6,12 @@
 #include "allocator.h"
 #include "iterator_qmj.h"
 
-namespace qmj {
+namespace qmj
+{
 template <typename value_type_>
-class vector_const_iterator {  // const_iterator of vector
- public:
+class vector_const_iterator
+{ // const_iterator of vector
+public:
   typedef std::random_access_iterator_tag iterator_category;
   typedef value_type_ value_type;
   typedef const value_type *pointer;
@@ -20,13 +22,16 @@ class vector_const_iterator {  // const_iterator of vector
   typedef vector_const_iterator<value_type> self;
 
   vector_const_iterator(value_type *cur = nullptr)
-      : cur(cur) {  // default or pointer construct
+      : cur(cur)
+  { // default or pointer construct
   }
 
-  vector_const_iterator(const self &x) : cur(x.cur) {  // copy construct
+  vector_const_iterator(const self &x) : cur(x.cur)
+  { // copy construct
   }
 
-  self &operator=(const self &x) {  // assign
+  self &operator=(const self &x)
+  { // assign
     cur = x.cur;
     return (*this);
   }
@@ -49,23 +54,27 @@ class vector_const_iterator {  // const_iterator of vector
 
   reference operator[](difference_type off) const { return (*(cur + off)); }
 
-  self &operator++() {
+  self &operator++()
+  {
     ++cur;
     return (*this);
   }
 
-  self operator++(int) {
+  self operator++(int)
+  {
     auto ret = *this;
     operator++();
     return (ret);
   }
 
-  self &operator--() {
+  self &operator--()
+  {
     --cur;
     return (*this);
   }
 
-  self operator--(int) {
+  self operator--(int)
+  {
     auto ret = *this;
     operator--();
     return (ret);
@@ -73,7 +82,8 @@ class vector_const_iterator {  // const_iterator of vector
 
   self operator+(const difference_type n) const { return self(cur + n); }
 
-  self &operator+=(const difference_type n) {
+  self &operator+=(const difference_type n)
+  {
     cur += n;
     return (*this);
   }
@@ -82,19 +92,21 @@ class vector_const_iterator {  // const_iterator of vector
 
   difference_type operator-(const self &x) const { return (cur - x.cur); }
 
-  self &operator-=(const difference_type n) {
+  self &operator-=(const difference_type n)
+  {
     cur -= n;
     return (*this);
   }
 
- protected:
+protected:
   value_type *cur;
 };
 
 template <typename value_type_>
 class vector_iterator
-    : public vector_const_iterator<value_type_> {  // iterator of vector
- public:
+    : public vector_const_iterator<value_type_>
+{ // iterator of vector
+public:
   typedef std::random_access_iterator_tag iterator_category;
   typedef value_type_ value_type;
   typedef value_type *pointer;
@@ -107,13 +119,16 @@ class vector_iterator
   using base_type::cur;
 
   vector_iterator(const pointer cur = nullptr)
-      : base_type(cur) {  // default or pointer construct
+      : base_type(cur)
+  { // default or pointer construct
   }
 
-  vector_iterator(const self &x) : base_type(x.cur) {  // copy construct
+  vector_iterator(const self &x) : base_type(x.cur)
+  { // copy construct
   }
 
-  self &operator=(const self &x) {  // assign
+  self &operator=(const self &x)
+  { // assign
     cur = x.cur;
     return *this;
   }
@@ -136,23 +151,27 @@ class vector_iterator
 
   reference operator[](difference_type off) const { return (*(cur + off)); }
 
-  self &operator++() {
+  self &operator++()
+  {
     ++cur;
     return (*this);
   }
 
-  self operator++(int) {
+  self operator++(int)
+  {
     auto ret = *this;
     operator++();
     return (ret);
   }
 
-  self &operator--() {
+  self &operator--()
+  {
     --cur;
     return (*this);
   }
 
-  self operator--(int) {
+  self operator--(int)
+  {
     auto ret = *this;
     operator--();
     return (ret);
@@ -160,7 +179,8 @@ class vector_iterator
 
   self operator+(const difference_type n) const { return self(cur + n); }
 
-  self &operator+=(const difference_type n) {
+  self &operator+=(const difference_type n)
+  {
     cur += n;
     return (*this);
   }
@@ -169,15 +189,17 @@ class vector_iterator
 
   difference_type operator-(const self &x) const { return (cur - x.cur); }
 
-  self &operator-=(const difference_type n) {
+  self &operator-=(const difference_type n)
+  {
     cur -= n;
     return (*this);
   }
 };
 
 template <typename value_type_, typename Alloc = _QMJ allocator<value_type_>>
-class vector {
- public:
+class vector
+{
+public:
   typedef value_type_ value_type;
   typedef value_type *pointer;
   typedef const value_type *const_pointer;
@@ -198,64 +220,76 @@ class vector {
   vector()
       : first(nullptr),
         last(nullptr),
-        end_storage(nullptr) {  // default construct
+        end_storage(nullptr)
+  { // default construct
   }
 
   explicit vector(const size_type n)
-      : vector() {  // construct with n*vale_type()
+      : vector()
+  { // construct with n*vale_type()
     first = alloc::allocate(n);
     alloc::construct(first, n);
     last = end_storage = first + n;
   }
 
   vector(const size_type n, const value_type &val)
-      : vector() {  // construct with n*val
+      : vector()
+  { // construct with n*val
     first = alloc::allocate(n);
     end_storage = last = alloc::copy_construct(first, n, val);
   }
 
   vector(const std::initializer_list<value_type> &lst)
-      : vector(lst.begin(), lst.end()) {  // construct with init list
+      : vector(lst.begin(), lst.end())
+  { // construct with init list
   }
 
   template <typename Iter,
             typename = typename enable_if<is_iterator<Iter>::value, void>::type>
-  vector(Iter bg, Iter ed) : vector() {  // construct with [bg,ed)
+  vector(Iter bg, Iter ed) : vector()
+  { // construct with [bg,ed)
     assign_imple(bg, ed, _QMJ iterator_category(bg));
   }
 
-  vector(const self &x) {  // copy construct
+  vector(const self &x)
+  { // copy construct
     first = alloc::allocate(x.size());
     last = alloc::copy_construct(x.first, x.last, first);
     end_storage = first + x.size();
   }
 
-  vector(self &&x) noexcept :  // move construct
-                               first(x.first),
-                               last(x.last),
-                               end_storage(x.end_storage) {
+  vector(self &&x) noexcept : // move construct
+                              first(x.first),
+                              last(x.last),
+                              end_storage(x.end_storage)
+  {
     x.first = x.last = x.end_storage = nullptr;
   }
 
-  self &operator=(self x) {  // copy ande move assign
+  self &operator=(self x)
+  { // copy ande move assign
     swap(x);
     return (*this);
   }
 
   self &operator=(
-      const std::initializer_list<value_type> &lst) {  // assign init_list
+      const std::initializer_list<value_type> &lst)
+  { // assign init_list
     assign(lst.begin(), lst.end());
     return *this;
   }
 
-  ~vector() {  // destroy func
+  ~vector()
+  { // destroy func
     alloc::destroy(first, last);
     alloc::deallocate(first);
   }
 
-  void shrink_to_fit() {
+  void shrink_to_fit()
+  {
     if (end_storage != last &&
-        !empty()) {  // have extra space,redistribute space of size
+        !empty())
+    { // have extra space,redistribute space of size
       size_t len = this->size();
       pointer ptr = alloc::allocate(len);
       pointer new_last = alloc::copy_construct(first, last, ptr);
@@ -263,18 +297,22 @@ class vector {
     }
   }
 
-  void swap(self &x) noexcept {  // swap with x
+  void swap(self &x) noexcept
+  { // swap with x
     std::swap(first, x.first);
     std::swap(last, x.last);
     std::swap(end_storage, x.end_storage);
   }
 
-  allocator_type get_allocator() const {  // return allocator of value_type
+  allocator_type get_allocator() const
+  { // return allocator of value_type
     return allocator_type();
   }
 
-  void reserve(const size_type n) {  // reserve n space
-    if (n > capacity()) {            // redistrubted space
+  void reserve(const size_type n)
+  { // reserve n space
+    if (n > capacity())
+    { // redistrubted space
       pointer ptr = alloc::allocate(n);
       pointer new_last = alloc::copy_construct(first, last, ptr);
       deallocate_and_update_ptr(ptr, new_last, n);
@@ -295,94 +333,116 @@ class vector {
 
   reverse_iterator rbegin() { return reverse_iterator(end()); }
 
-  const_reverse_iterator rbegin() const {
+  const_reverse_iterator rbegin() const
+  {
     return const_reverse_iterator(end());
   }
 
   reverse_iterator rend() { return reverse_iterator(begin()); }
 
-  const_reverse_iterator rend() const {
+  const_reverse_iterator rend() const
+  {
     return const_reverse_iterator(begin());
   }
 
-  const_reverse_iterator crbegin() const {
+  const_reverse_iterator crbegin() const
+  {
     return const_reverse_iterator(cend());
   }
 
-  const_reverse_iterator crend() const {
+  const_reverse_iterator crend() const
+  {
     return const_reverse_iterator(cbegin());
   }
 
-  size_type size() const {  // return size
+  size_type size() const
+  { // return size
     return (last - first);
   }
 
-  reference at(const size_type n) {  // reference of ele in subscribe n
+  reference at(const size_type n)
+  { // reference of ele in subscribe n
     return (*(first + n));
   }
 
   const_reference at(
-      const size_type n) const {  // const_reference of ele in subscribe n
+      const size_type n) const
+  { // const_reference of ele in subscribe n
     return (*(first + n));
   }
 
-  pointer data() {  // pointer of adress of first ele
+  pointer data()
+  { // pointer of adress of first ele
     return (first);
   }
 
-  const_pointer data() const {  // const_pointer of address of first ele
+  const_pointer data() const
+  { // const_pointer of address of first ele
     return (first);
   }
 
-  iterator erase(iterator pos) {  // erase and destroy ele in pos
+  iterator erase(iterator pos)
+  { // erase and destroy ele in pos
     std::copy(pos + 1, end(), pos);
     --last;
     alloc::destroy(last);
     return pos;
   }
 
-  iterator erase(iterator bg, iterator ed) {  // erase and destroy ele of
-                                              // [bg,ed)
+  iterator erase(iterator bg, iterator ed)
+  { // erase and destroy ele of
+    // [bg,ed)
     iterator iter = std::copy(ed, end(), bg);
     alloc::destroy(first + (iter - begin()), last);
     last = first + (iter - begin());
     return bg;
   }
 
-  void clear() {  // clear and destroy all ele
+  void clear()
+  { // clear and destroy all ele
     alloc::destroy(first, last);
     last = first;
   }
 
-  void assign(const size_type n, const value_type &val) {  // assign n*val
+  void assign(const size_type n, const value_type &val)
+  { // assign n*val
     clear();
     insert(begin(), n, val);
   }
 
   template <typename Iter>
   typename enable_if<is_iterator<Iter>::value, void>::type assign(
-      Iter bg, Iter ed) {  // assign ele in [bg,ed)
+      Iter bg, Iter ed)
+  { // assign ele in [bg,ed)
     clear();
     assign_imple(bg, ed, typename _QMJ iterator_traits<Iter>::iterator_category());
   }
 
   void assign(
-      const std::initializer_list<value_type> &lst) {  // assign init list
+      const std::initializer_list<value_type> &lst)
+  { // assign init list
     assign(lst.begin(), lst.end());
   }
 
-  size_type max_size() const {  // return max size can container of value_type
+  size_type max_size() const
+  { // return max size can container of value_type
     return alloc::max_size();
   }
 
-  void resize(const size_type n) {  // resize as n,extra ele is value_type()
-    if (n <= size()) {              // destory extra ele
+  void resize(const size_type n)
+  { // resize as n,extra ele is value_type()
+    if (n <= size())
+    { // destory extra ele
       alloc::destroy(first + n, last);
       last = first + n;
-    } else if (n <= capacity()) {  // have adequate space
+    }
+    else if (n <= capacity())
+    { // have adequate space
       alloc::construct(last, first + n);
       last = first + n;
-    } else {  // redistribute the space and move old ele
+    }
+    else
+    { // redistribute the space and move old ele
       pointer ptr = alloc::allocate(n);
       alloc::copy_construct(first, last, ptr);
       alloc::construct(ptr + size(), ptr + n);
@@ -390,14 +450,20 @@ class vector {
     }
   }
 
-  void resize(const size_type n, const value_type &val) {
-    if (n <= size()) {
+  void resize(const size_type n, const value_type &val)
+  {
+    if (n <= size())
+    {
       alloc::destroy(first + n, last);
       last = first + n;
-    } else if (n <= capacity()) {
+    }
+    else if (n <= capacity())
+    {
       alloc::copy_construct(last, first + n, val);
       last = first + n;
-    } else {
+    }
+    else
+    {
       pointer ptr = alloc::allocate(n);
       alloc::copy_construct(first, last, ptr);
       alloc::copy_construct(ptr + size(), ptr + n, val);
@@ -421,29 +487,35 @@ class vector {
 
   const_reference back() const { return *(last - 1); }
 
-  iterator insert(iterator pos, value_type &&val) {
+  iterator insert(iterator pos, value_type &&val)
+  {
     return emplace(pos, std::move(val));
   }
 
   iterator insert(iterator pos, const size_t n, const value_type &val);
 
-  iterator insert(iterator pos, const value_type &val) {
+  iterator insert(iterator pos, const value_type &val)
+  {
     return (insert(pos, 1, val));
   }
 
   template <typename Iter>
   typename enable_if<is_iterator<Iter>::value, iterator>::type insert(
-      iterator pos, Iter bg, Iter ed) {
+      iterator pos, Iter bg, Iter ed)
+  {
     return insert_imple(pos, bg, ed,
-                       typename _QMJ iterator_traits<Iter>::iterator_category());
+                        typename _QMJ iterator_traits<Iter>::iterator_category());
   }
 
-  iterator insert(iterator pos, const std::initializer_list<value_type> &lst) {
+  iterator insert(iterator pos, const std::initializer_list<value_type> &lst)
+  {
     return insert(pos, lst.begin(), lst.end());
   }
 
-  void push_back(const value_type &val) {
-    if (last == end_storage) {
+  void push_back(const value_type &val)
+  {
+    if (last == end_storage)
+    {
       const size_type len = size() ? 2 * size() : 1;
       auto ptr = alloc::allocate(len);
       auto new_last = alloc::copy_construct(first, last, ptr);
@@ -452,15 +524,18 @@ class vector {
     alloc::copy_construct(last++, val);
   }
 
-  void push_back(value_type &&val) {
+  void push_back(value_type &&val)
+  {
     emplace_back(std::forward<value_type>(val));
   }
 
   void pop_back() { alloc::destroy(--last); }
 
   template <typename... types>
-  void emplace_back(types &&... args) {
-    if (last == end_storage) {
+  void emplace_back(types &&... args)
+  {
+    if (last == end_storage)
+    {
       const size_type len = size() ? 2 * size() : 1;
       auto ptr = alloc::allocate(len);
       auto new_last = alloc::copy_construct(first, last, ptr);
@@ -470,23 +545,28 @@ class vector {
   }
 
   template <typename... types>
-  iterator emplace(iterator pos, types &&... args) {
+  iterator emplace(iterator pos, types &&... args)
+  {
     size_type off = pos - begin();
     emplace_back(std::forward<types>(args)...);
     _QMJ rotate(begin() + off, --end(), end());
     return (begin() + off);
   }
 
- private:
+private:
   template <typename Iter>
-  void assign_imple(Iter bg, Iter ed, std::input_iterator_tag) {
-    for (; bg != ed; ++bg) push_back(*bg);
+  void assign_imple(Iter bg, Iter ed, std::input_iterator_tag)
+  {
+    for (; bg != ed; ++bg)
+      push_back(*bg);
   }
 
   template <typename Iter>
-  void assign_imple(Iter bg, Iter ed, std::forward_iterator_tag) {
+  void assign_imple(Iter bg, Iter ed, std::forward_iterator_tag)
+  {
     const size_t len = std::distance(bg, ed);
-    if (capacity() < len) {
+    if (capacity() < len)
+    {
       alloc::deallocate(first);
       first = alloc::allocate(len);
       end_storage = first + len;
@@ -496,30 +576,36 @@ class vector {
 
   template <typename Iter>
   iterator insert_imple(iterator pos, Iter bg, Iter ed,
-                        std::input_iterator_tag) {
-    const size_type off = pos - begin();  // offset
+                        std::input_iterator_tag)
+  {
+    const size_type off = pos - begin(); // offset
     const size_type old_size = size();
-    for (; bg != ed; ++bg) push_back(*bg);
+    for (; bg != ed; ++bg)
+      push_back(*bg);
     _QMJ rotate(begin() + off, begin() + old_size, end());
     return (begin() + off);
   }
 
   template <typename Iter>
   iterator insert_imple(iterator pos, Iter bg, Iter ed,
-                        std::forward_iterator_tag) {  // insert [bg,ed) before
-                                                      // pos if bg is forward
-                                                      // iterator
-    const size_type off = pos - begin();  // offset
+                        std::forward_iterator_tag)
+  {                                      // insert [bg,ed) before
+                                         // pos if bg is forward
+                                         // iterator
+    const size_type off = pos - begin(); // offset
     const size_type count =
-        _QMJ distance(bg, ed);  // for calculate new space if need
+        _QMJ distance(bg, ed); // for calculate new space if need
     if (count <=
         static_cast<size_type>(
-            end_storage - last)) {  // there is plenty of storage space in tail
+            end_storage - last))
+    { // there is plenty of storage space in tail
       const size_type after_ele = end() - pos;
       std::copy_backward(pos, end(), last + count);
       last += count;
       std::copy(bg, ed, pos);
-    } else {  // redistribute space
+    }
+    else
+    { // redistribute space
       const size_type old_size = capacity();
       const size_type len = old_size + (old_size > count ? old_size : count);
       pointer ptr = alloc::allocate(len);
@@ -532,10 +618,11 @@ class vector {
   }
 
   void deallocate_and_update_ptr(pointer new_first, pointer new_last,
-                                 const size_type n) {  // destroy old data and
-                                                       // dallocate old space
-                                                       // ,update pointer for
-                                                       // new space
+                                 const size_type n)
+  { // destroy old data and
+    // dallocate old space
+    // ,update pointer for
+    // new space
     alloc::destroy(first, last);
     alloc::deallocate(first);
     first = new_first;
@@ -543,7 +630,7 @@ class vector {
     end_storage = first + n;
   }
 
- private:
+private:
   pointer first;
   pointer last;
   pointer end_storage;
@@ -552,25 +639,33 @@ class vector {
 template <typename value_type, typename alloc>
 typename vector<value_type, alloc>::iterator vector<value_type, alloc>::insert(
     iterator pos, const size_t n,
-    const value_type &val) {           // insert n val before pos
-  if (!n) return pos;                  // do nothing if n==0
-  differene_type off = pos - begin();  // offset
+    const value_type &val)
+{ // insert n val before pos
+  if (!n)
+    return pos;                       // do nothing if n==0
+  differene_type off = pos - begin(); // offset
   if (static_cast<size_t>(end_storage - last) >=
-      n) {  // there is plenty of storage space in tail
+      n)
+  { // there is plenty of storage space in tail
     const size_type after_ele = end() - pos;
-    if (after_ele > n) {  // the ele of [pos,end())>n
+    if (after_ele > n)
+    { // the ele of [pos,end())>n
       alloc::copy_construct(end() - n, end(), last);
       std::copy_backward(pos, end() - n, end());
       std::fill(pos, pos + n, val);
-    } else {
+    }
+    else
+    {
       alloc::copy_construct(last, n - after_ele, val);
       alloc::copy_construct(pos, end(), last + (n - after_ele));
       std::fill(pos, end(), val);
     }
     last += n;
-  } else {  // redistribute space
+  }
+  else
+  { // redistribute space
     const size_type old_size = end_storage - first;
-    const size_type len = old_size + (old_size > n ? old_size : n);  // new size
+    const size_type len = old_size + (old_size > n ? old_size : n); // new size
     auto ptr = alloc::allocate(len);
     auto new_last = alloc::copy_construct(first, first + (pos - first), ptr);
     new_last = alloc::copy_construct(new_last, n, val);
@@ -582,47 +677,54 @@ typename vector<value_type, alloc>::iterator vector<value_type, alloc>::insert(
 
 template <typename value_type, typename alloc>
 inline void swap(_QMJ vector<value_type> &left,
-                 _QMJ vector<value_type> &right) noexcept {
+                 _QMJ vector<value_type> &right) noexcept
+{
   left.swap(right);
 }
 
 template <typename value_type, typename alloc>
 inline bool operator==(const _QMJ vector<value_type, alloc> &left,
-                       const _QMJ vector<value_type, alloc> &right) {
+                       const _QMJ vector<value_type, alloc> &right)
+{
   return (left.size() == right.size() &&
           std::equal(left.begin(), left.end(), right.begin()));
 }
 
 template <typename value_type, typename alloc>
 inline bool operator!=(const _QMJ vector<value_type, alloc> &left,
-                       const _QMJ vector<value_type, alloc> &right) {
+                       const _QMJ vector<value_type, alloc> &right)
+{
   return !(left == right);
 }
 
 template <typename value_type, typename alloc>
 inline bool operator<(const _QMJ vector<value_type, alloc> &left,
-                      const _QMJ vector<value_type, alloc> &right) {
+                      const _QMJ vector<value_type, alloc> &right)
+{
   return std::lexicographical_compare(left.begin(), left.end(), right.begin(),
                                       right.end());
 }
 
 template <typename value_type, typename alloc>
 inline bool operator<=(const _QMJ vector<value_type, alloc> &left,
-                       const _QMJ vector<value_type, alloc> &right) {
+                       const _QMJ vector<value_type, alloc> &right)
+{
   return !(right < left);
 }
 
 template <typename value_type, typename alloc>
 inline bool operator>(const _QMJ vector<value_type, alloc> &left,
-                      const _QMJ vector<value_type, alloc> &right) {
+                      const _QMJ vector<value_type, alloc> &right)
+{
   return right < left;
 }
 
 template <typename value_type, typename alloc>
 inline bool operator>=(const _QMJ vector<value_type, alloc> &left,
-                       const _QMJ vector<value_type, alloc> &right) {
+                       const _QMJ vector<value_type, alloc> &right)
+{
   return !(left < right);
 }
-}
+} // namespace qmj
 
 #endif

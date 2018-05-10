@@ -6,15 +6,15 @@
 
 namespace qmj {
 
-template <typename key_type, typename key_compare, typename Alloc,
-          bool is_multi>
+template <typename key_type_, typename key_compare_, typename Alloc,
+          bool is_multi_>
 struct set_traits {
-  typedef key_type key_type;
+  typedef key_type_ key_type;
   typedef key_type value_type;
-  typedef key_compare key_compare;
+  typedef key_compare_ key_compare;
   typedef key_compare value_compare;
   typedef Alloc allocator_type;
-  enum { is_multi = is_multi };
+  enum { is_multi = is_multi_ };
 
   static const key_type& keyOfValue(const key_type& key) { return (key); }
 
@@ -28,11 +28,11 @@ struct set_traits {
   };*/
 };
 
-template <typename key_type, typename Compare = std::less<key_type>,
-          typename Alloc = qmj::allocator<key_type>>
-class set : public rb_tree<set_traits<key_type, Compare, Alloc, false>> {
+template <typename key_type_, typename Compare = std::less<key_type_>,
+          typename Alloc = qmj::allocator<key_type_>>
+class set : public rb_tree<set_traits<key_type_, Compare, Alloc, false>> {
  public:
-  typedef key_type key_type;
+  typedef key_type_ key_type;
   typedef key_type value_type;
   typedef Compare key_compare;
   typedef Compare value_compare;
@@ -100,11 +100,11 @@ inline void swap(set<key_type, Compare, Alloc>& left,
 
 namespace qmj {
 
-template <typename key_type, typename Compare = std::less<key_type>,
-          typename Alloc = qmj::allocator<key_type>>
-class multiset : public rb_tree<set_traits<key_type, Compare, Alloc, true>> {
+template <typename key_type_, typename Compare = std::less<key_type_>,
+          typename Alloc = qmj::allocator<key_type_>>
+class multiset : public rb_tree<set_traits<key_type_, Compare, Alloc, true>> {
  public:
-  typedef key_type key_type;
+  typedef key_type_ key_type;
   typedef key_type value_type;
   typedef Compare key_compare;
   typedef Compare value_compare;

@@ -70,14 +70,14 @@ struct rb_tree_node : public rb_tree_base_node<value_type>
   }
 };
 
-template <typename value_type>
+template <typename value_type_>
 struct rb_tree_const_iterator
 {
   template <typename traits>
   friend class rb_tree;
 
   typedef std::bidirectional_iterator_tag iterator_category;
-  typedef value_type value_type;
+  typedef value_type_ value_type;
   typedef const value_type &reference;
   typedef const value_type *pointer;
   typedef ptrdiff_t difference_type;
@@ -153,11 +153,11 @@ protected:
   link_type node;
 };
 
-template <typename value_type>
-struct rb_tree_iterator : public rb_tree_const_iterator<value_type>
+template <typename value_type_>
+struct rb_tree_iterator : public rb_tree_const_iterator<value_type_>
 {
   typedef std::bidirectional_iterator_tag iterator_category;
-  typedef value_type value_type;
+  typedef value_type_ value_type;
   typedef value_type &reference;
   typedef value_type *pointer;
   typedef ptrdiff_t difference_type;
@@ -173,25 +173,25 @@ struct rb_tree_iterator : public rb_tree_const_iterator<value_type>
 
   rb_tree_iterator(const self &x) : base_iterator(x.node) {}
 
-  reference operator*() const { return (node->value); }
+  reference operator*() const { return (this->node->value); }
 
   pointer operator->() const { return (&(operator*())); }
 
   self &operator=(const self &x)
   {
-    node = x.node;
+    this->node = x.node;
     return (*this);
   }
 
   self &operator--()
   {
-    if (node->left->p) // node have a left node that not nil
-      node = node_type::maximum(node->left);
+    if (this->node->left->p) // node have a left node that not nil
+      this->node = node_type::maximum(this->node->left);
     else
     { // node have a left node is nil
-      while (node->p->p && node->p->left == node)
-        node = node->p;
-      node = node->p;
+      while (this->node->p->p && this->node->p->left == this->node)
+        this->node = this->node->p;
+      this->node = this->node->p;
     }
     return *this;
   }
@@ -205,13 +205,13 @@ struct rb_tree_iterator : public rb_tree_const_iterator<value_type>
 
   self &operator++()
   {
-    if (node->right->p)
-      node = node_type::minimum(node->right);
+    if (this->node->right->p)
+      this->node = node_type::minimum(this->node->right);
     else
     {
-      while (node->p->p && node->p->right == node)
-        node = node->p;
-      node = node->p;
+      while (this->node->p->p && this->node->p->right == this->node)
+        this->node = this->node->p;
+      this->node = this->node->p;
     }
     return *this;
   }
@@ -254,7 +254,6 @@ public:
   };
   typedef typename traits::key_compare key_compare;
   typedef key_compare Compare;
-  typedef typename traits::allocator_type allocator_type;
 
   typedef rb_tree_const_iterator<value_type> const_iterator;
   typedef typename If<is_same<key_type, value_type>::value, const_iterator,
@@ -660,11 +659,11 @@ protected:
     {
       print(rt->right, counter_hight + 1);
       for (auto n = counter_hight; n != -1; --n)
-        cout << "\t";
-      cout << rt->value;
-      rt->color ? cout << "|��" << endl : cout << "|��" << endl;
+        std::cout << "\t";
+      std::cout << rt->value;
+      rt->color ? std::cout << "|��" << std::endl : std::cout << "|��" << std::endl;
       print(rt->left, counter_hight + 1);
-      cout << endl;
+      std::cout << std::endl;
     }
   }
 

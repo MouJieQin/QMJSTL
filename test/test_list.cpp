@@ -15,7 +15,7 @@ class Test_list
 {
   public:
     typedef value_type_ value_type;
-    typedef Test_not_map_base<std::list<value_type>, qmj::list<value_type>> base_type;
+    typedef Test_list_base<std::list<value_type>, qmj::list<value_type>> base_type;
     Test_list() {}
     ~Test_list() {}
 

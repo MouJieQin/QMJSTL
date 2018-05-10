@@ -10,7 +10,7 @@ namespace test
 
 template <typename value_type>
 class Test_vector
-    : public Test_not_map<std::vector<value_type>, qmj::vector<value_type>>
+    : public Test_rand_container<std::vector<value_type>, qmj::vector<value_type>>
 {
 };
 

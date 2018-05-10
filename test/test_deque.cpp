@@ -11,11 +11,11 @@ namespace test
 
 template <typename value_type_>
 class Test_deque
-    : public Test_not_map<std::deque<value_type_>, qmj::deque<value_type_>>
+    : public Test_rand_container<std::deque<value_type_>, qmj::deque<value_type_>>
 {
   public:
     typedef value_type_ value_type;
-    typedef Test_not_map<std::deque<value_type_>, qmj::deque<value_type_>>
+    typedef Test_rand_container<std::deque<value_type_>, qmj::deque<value_type_>>
         base_type;
 
     Test_deque() : base_type() {}

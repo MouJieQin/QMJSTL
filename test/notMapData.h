@@ -55,6 +55,22 @@ bool is_equal(const ContainerA &left, const ContainerB &right)
     return _is_equal_imple(left, right, qmj::iterator_category(left.begin()));
 }
 
+template <typename ContainerA, typename ContainerB>
+bool _unordered_is_equal(const ContainerA &left, const ContainerB &right)
+{
+    typedef typename ContainerA::value_type value_type;
+    if (left.size() != right.size())
+        return false;
+    std::vector<value_type> left_v, right_v;
+    left_v.reverse(left.size());
+    right_v.reverse(right.size());
+    left_v.insert(left.begin(), left.end());
+    right_v.insert(right.begin(), right.end());
+    std::sort(left_v.begin(), left.begin());
+    std::sort(right_v.begin(), right_v.end());
+    return std::equal(left_v.begin(), left_v.end(), right_v.begin());
+}
+
 template <typename Iter, typename Dif>
 Iter advance(Iter iter, Dif dif)
 {
@@ -143,12 +159,10 @@ bool create_data(std::vector<std::pair<std::string, int>> &vec,
 }
 
 template <typename STD_container, typename QMJ_container>
-class Test_not_map_base : public testing::Test
+class Test_data : public testing::Test
 {
   public:
     typedef typename STD_container::value_type value_type;
-    Test_not_map_base() : data_size(0) {}
-    ~Test_not_map_base() {}
 
     bool reset_data(const size_t new_size)
     {
@@ -161,11 +175,6 @@ class Test_not_map_base : public testing::Test
         return create_data(data, new_size);
     }
 
-    bool load_data()
-    {
-        return (this->reset_data(TEST_DATASIZE) && this->test_assign());
-    }
-
     bool is_equal() { return qmj::test::is_equal(std_con, qmj_con); }
 
     void test_clear()
@@ -176,19 +185,39 @@ class Test_not_map_base : public testing::Test
             << "qmj::Container is not equal to std::Container after clear";
     }
 
+  protected:
+    size_t data_size = 0;
+    std::vector<value_type> data;
+    STD_container std_con;
+    QMJ_container qmj_con;
+};
+
+template <typename STD_container, typename QMJ_container>
+class Test_line_container : public Test_data<STD_container, QMJ_container>
+{
+  public:
+    typedef Test_data<STD_container, QMJ_container> base_type;
+    Test_line_container() : base_type() {}
+    ~Test_line_container() {}
+
+    bool load_data()
+    {
+        return (this->reset_data(TEST_DATASIZE) && this->test_assign());
+    }
+
     bool test_assign()
     {
         try
         {
-            std_con.assign(data.begin(), data.end());
-            qmj_con.assign(data.begin(), data.end());
+            this->std_con.assign(this->data.begin(), this->data.end());
+            this->qmj_con.assign(this->data.begin(), this->data.end());
         }
         catch (...)
         {
             EXPECT_TRUE(false) << "copy/assign error";
             return false;
         }
-        bool result = is_equal();
+        bool result = this->is_equal();
         EXPECT_TRUE(result)
             << "qmj::Container is not equal to std::Container after copy/assign";
         return result;
@@ -202,22 +231,16 @@ class Test_not_map_base : public testing::Test
         this->qmj_con.resize(new_size);
         EXPECT_TRUE(this->is_equal()) << "qmj::forward is not equal to std::forward_list after resize";
     }
-
-  protected:
-    size_t data_size;
-    std::vector<value_type> data;
-    STD_container std_con;
-    QMJ_container qmj_con;
 };
 
 template <typename STD_container, typename QMJ_container>
-class Test_not_map : public Test_not_map_base<STD_container, QMJ_container>
+class Test_rand_container : public Test_line_container<STD_container, QMJ_container>
 {
   public:
     typedef typename STD_container::value_type value_type;
-    typedef Test_not_map_base<STD_container, QMJ_container> base_type;
-    Test_not_map() : base_type() {}
-    ~Test_not_map() {}
+    typedef Test_line_container<STD_container, QMJ_container> base_type;
+    Test_rand_container() : base_type() {}
+    ~Test_rand_container() {}
 
     void test_erase()
     {
@@ -291,11 +314,11 @@ bool operator<(const std::pair<std::string, int> &left, const std::pair<std::str
 
 template <typename STD_container, typename QMJ_container>
 class Test_list_base
-    : public Test_not_map_base<STD_container, QMJ_container>
+    : public Test_line_container<STD_container, QMJ_container>
 {
   public:
     typedef typename STD_container::value_type value_type;
-    typedef Test_not_map_base<STD_container, QMJ_container> base_type;
+    typedef Test_line_container<STD_container, QMJ_container> base_type;
 
     Test_list_base() {}
 
@@ -353,6 +376,107 @@ class Test_list_base
         this->std_con.unique();
         this->qmj_con.unique();
         EXPECT_TRUE(this->is_equal()) << "qmj::Container is not equal to std::Container after unique";
+    }
+};
+
+template <typename STD_container, typename QMJ_container>
+class Test_set_map_base : public Test_data<STD_container, QMJ_container>
+{
+  public:
+    typedef Test_data<STD_container, QMJ_container> base_type;
+    typedef typename base_type::value_type value_type;
+    Test_set_map_base() : base_type() {}
+    ~Test_set_map_base() {}
+
+    bool is_equal(const STD_container &left,
+                  const QMJ_container &right)
+    {
+        if (left.size() != right.size())
+            return false;
+        for (const value_type &val : left)
+            if (right.find(val) == right.end())
+                return false;
+        return true;
+    }
+
+    bool is_equal()
+    {
+        return is_equal(this->std_con, this->qmj_con);
+    }
+
+    bool load_data()
+    {
+        if (!this->reset_data(TEST_DATASIZE))
+            return false;
+        try
+        {
+            this->std_con.insert(this->data.begin(), this->data.end());
+            this->qmj_con.insert(this->data.begin(), this->data.end());
+        }
+        catch (...)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    void test_assign()
+    {
+        ASSERT_TRUE(this->reset_data(TEST_DATASIZE)) << "reset data error";
+        STD_container std_assign(this->data.begin(), this->data.end());
+        QMJ_container qmj_assign(this->data.begin(), this->data.end());
+        this->std_con = std_assign;
+        this->qmj_con = qmj_assign;
+        EXPECT_TRUE(this->is_equal()) << "qmj::container is not euqal to std::container after assign";
+    }
+
+    void test_insert()
+    {
+        this->std_con.insert(this->data.begin(), this->data.end());
+        this->std_con.insert(this->data.begin(), this->data.end());
+        this->qmj_con.insert(this->data.begin(), this->data.end());
+        this->qmj_con.insert(this->data.begin(), this->data.end());
+        EXPECT_TRUE(this->is_equal()) << "not equal after insert";
+    }
+
+    void test_count()
+    {
+        for (const value_type &val : this->data)
+        {
+            ASSERT_EQ(this->std_con.count(val), this->qmj_con.count(val))
+                << "count not equlal ";
+        }
+    }
+
+    void test_find()
+    {
+        for (const value_type &val : this->data)
+        {
+            ASSERT_EQ(*this->std_con.find(val), *this->qmj_con.find(val))
+                << "find not equlal ";
+        }
+    }
+
+    void test_erase()
+    {
+        for (size_t i = 0; i != this->data.size() / 3; ++i)
+        {
+            size_t std_count = this->std_con.erase(this->data[i]);
+            size_t qmj_count = this->qmj_con.erase(this->data[i]);
+            ASSERT_EQ(std_count, qmj_count) << "count not equal in erase";
+        }
+
+        for (size_t i = this->data.size() / 3; i != this->data.size() / 2; ++i)
+        {
+            auto std_pos = this->std_con.find(this->data[i]);
+            auto qmj_pos = this->qmj_con.find(this->data[i]);
+            if (std_pos != this->std_con.end())
+                this->std_con.erase(std_pos);
+            if (qmj_pos != this->qmj_con.end())
+                this->qmj_con.erase(qmj_pos);
+        }
+
+        EXPECT_TRUE(this->is_equal()) << "unordered_set not equal after erase";
     }
 };
 
