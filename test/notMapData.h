@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "../QMJSTL/hashfunction.h"
 
 namespace qmj
 {
@@ -23,6 +24,12 @@ std::ostream &display(const Container &con)
     for (auto const &val : con)
         std::cout << val << " ";
     return std::cout;
+}
+
+bool operator<(const std::pair<std::string, int> &left,
+               const std::pair<std::string, int> &right)
+{
+    return left.first < right.first;
 }
 
 template <typename ContainerA, typename ContainerB>
@@ -307,11 +314,6 @@ class Test_rand_container : public Test_line_container<STD_container, QMJ_contai
     }
 };
 
-bool operator<(const std::pair<std::string, int> &left, const std::pair<std::string, int> &right)
-{
-    return left.first < right.first;
-}
-
 template <typename STD_container, typename QMJ_container>
 class Test_list_base
     : public Test_line_container<STD_container, QMJ_container>
@@ -376,6 +378,14 @@ class Test_list_base
         this->std_con.unique();
         this->qmj_con.unique();
         EXPECT_TRUE(this->is_equal()) << "qmj::Container is not equal to std::Container after unique";
+    }
+};
+
+struct hash_pair
+{
+    size_t operator()(const std::pair<std::string, int> &pr) const
+    {
+        return _QMJ hash<int>()(pr.second);
     }
 };
 
