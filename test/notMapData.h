@@ -16,7 +16,7 @@ namespace test
 {
 
 #define MAXLEN_STRING 15
-#define TEST_DATASIZE 100000
+#define TEST_DATASIZE 10000
 
 template <typename Container>
 std::ostream &display(const Container &con)
@@ -487,6 +487,21 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
         }
 
         EXPECT_TRUE(this->is_equal()) << "unordered_set not equal after erase";
+    }
+
+    void test_equal_range()
+    {
+        test_insert();
+        for (size_t i = 0; i != this->data.size(); ++i)
+        {
+            auto std_range = this->std_con.equal_range(this->data[i]);
+            auto qmj_range = this->qmj_con.equal_range(this->data[i]);
+            ASSERT_EQ(qmj::distance(std_range.first, std_range.second),
+                      qmj::distance(qmj_range.first, qmj_range.second))
+                << "not equal in equal range";
+            ASSERT_TRUE(std::equal(std_range.first, std_range.second, qmj_range.first))
+                << "not equal in equal range";
+        }
     }
 };
 

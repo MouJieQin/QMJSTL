@@ -5,17 +5,17 @@
 #include "hashtable.h"
 
 namespace qmj {
-template <typename key_type, typename data_type, typename HashFunction,
-          typename EqualKey, typename Alloc, bool is_multi>
+template <typename key_type_, typename data_type_, typename HashFunction_,
+          typename EqualKey_, typename Alloc, bool is_multi_>
 struct unordered_map_traits {
-  typedef key_type key_type;
-  typedef data_type data_type;
+  typedef key_type_ key_type;
+  typedef data_type_ data_type;
   typedef std::pair<const key_type, data_type> value_type;
-  typedef HashFunction HashFunction;
-  typedef EqualKey EqualKey;
+  typedef HashFunction_ HashFunction;
+  typedef EqualKey_ EqualKey;
   typedef Alloc allocator_type;
 
-  enum { is_multi = is_multi };
+  enum { is_multi = is_multi_ };
 
   template <typename type1, typename type2>
   inline static const key_type& ExtractKey(const std::pair<type1, type2>& pr) {
@@ -29,19 +29,19 @@ struct unordered_map_traits {
   }
 };
 
-template <typename key_type, typename data_type,
-          typename HashFunction = qmj::hash<key_type>,
-          typename EqualKey = std::equal_to<key_type>,
-          typename Alloc = qmj::allocator<std::pair<const key_type, data_type>>>
+template <typename key_type_, typename data_type_,
+          typename HashFunction = qmj::hash<key_type_>,
+          typename EqualKey = std::equal_to<key_type_>,
+          typename Alloc = qmj::allocator<std::pair<const key_type_, data_type_>>>
 class unordered_map
-    : public hashtable<unordered_map_traits<key_type, data_type, HashFunction,
+    : public hashtable<unordered_map_traits<key_type_, data_type_, HashFunction,
                                             EqualKey, Alloc, false>> {
  public:
-  typedef hashtable<unordered_map_traits<key_type, data_type, HashFunction,
+  typedef hashtable<unordered_map_traits<key_type_, data_type_, HashFunction,
                                          EqualKey, Alloc, false>>
       base_type;
 
-  typedef data_type data_type;
+  typedef data_type_ data_type;
   typedef typename base_type::key_type key_type;
   typedef typename base_type::value_type value_type;
   typedef typename base_type::hasher hasher;
@@ -128,20 +128,20 @@ void swap(
   left.swap(right);
 }
 
-template <typename key_type, typename data_type,
-          typename HashFunction = qmj::hash<key_type>,
-          typename EqualKey = std::equal_to<key_type>,
-          typename Alloc = qmj::allocator<std::pair<const key_type, data_type>>>
+template <typename key_type_, typename data_type_,
+          typename HashFunction = qmj::hash<key_type_>,
+          typename EqualKey = std::equal_to<key_type_>,
+          typename Alloc = qmj::allocator<std::pair<const key_type_, data_type_>>>
 class unordered_multimap
-    : public hashtable<unordered_map_traits<key_type, data_type, HashFunction,
+    : public hashtable<unordered_map_traits<key_type_, data_type_, HashFunction,
                                             EqualKey, Alloc, true>> {
  public:
-  typedef hashtable<unordered_map_traits<key_type, data_type, HashFunction,
+  typedef hashtable<unordered_map_traits<key_type_, data_type_, HashFunction,
                                          EqualKey, Alloc, true>>
       base_type;
 
-  typedef data_type data_type;
-  typedef typename base_type::key_type key_type;
+  typedef data_type_ data_type;
+  typedef typename base_type::key_type_ key_type;
   typedef typename base_type::value_type value_type;
   typedef typename base_type::hasher hasher;
   typedef typename base_type::key_equal key_equal;
