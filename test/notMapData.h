@@ -32,16 +32,16 @@ bool operator<(const std::pair<std::string, int> &left,
     return left.first < right.first;
 }
 
-template <typename ContainerA, typename ContainerB>
-bool _is_equal_imple(const ContainerA &left, const ContainerB &right,
+template <typename STD_container, typename QMJ_container>
+bool _is_equal_imple(const STD_container &left, const QMJ_container &right,
                      std::bidirectional_iterator_tag)
 {
     return (left.size() == right.size() &&
             std::equal(left.begin(), left.end(), right.begin()));
 }
 
-template <typename ContainerA, typename ContainerB>
-bool _is_equal_imple(const ContainerA &left, const ContainerB &right,
+template <typename STD_container, typename QMJ_container>
+bool _is_equal_imple(const STD_container &left, const QMJ_container &right,
                      std::forward_iterator_tag)
 {
     try
@@ -56,27 +56,35 @@ bool _is_equal_imple(const ContainerA &left, const ContainerB &right,
     return false;
 }
 
-template <typename ContainerA, typename ContainerB>
-bool is_equal(const ContainerA &left, const ContainerB &right)
+template <typename STD_container, typename QMJ_container>
+bool is_equal(const STD_container &left, const QMJ_container &right)
 {
     return _is_equal_imple(left, right, qmj::iterator_category(left.begin()));
 }
 
-template <typename ContainerA, typename ContainerB>
-bool _unordered_is_equal(const ContainerA &left, const ContainerB &right)
+template <typename Container, typename = void>
+struct is_unordered : qmj::false_type
 {
-    typedef typename ContainerA::value_type value_type;
-    if (left.size() != right.size())
-        return false;
-    std::vector<value_type> left_v, right_v;
-    left_v.reverse(left.size());
-    right_v.reverse(right.size());
-    left_v.insert(left.begin(), left.end());
-    right_v.insert(right.begin(), right.end());
-    std::sort(left_v.begin(), left.begin());
-    std::sort(right_v.begin(), right_v.end());
-    return std::equal(left_v.begin(), left_v.end(), right_v.begin());
-}
+};
+
+template <typename Container>
+struct is_unordered<Container,
+                    qmj::void_t<typename Container::local_iterator>>
+    : qmj::true_type
+{
+};
+
+template <typename Container, typename = void>
+struct is_multi : qmj::false_type
+{
+};
+
+template <typename Container>
+struct is_multi<Container,
+                qmj::void_t<typename Container::is_multi>>
+    : qmj::true_type
+{
+};
 
 template <typename Iter, typename Dif>
 Iter advance(Iter iter, Dif dif)
@@ -142,18 +150,18 @@ bool create_data(std::vector<std::string> &vec, const size_t data_size)
     return true;
 }
 
-bool create_data(std::vector<std::pair<std::string, int>> &vec,
-                 const size_t data_size)
+template <typename key_type, typename value_type>
+bool create_data(std::vector<std::pair<key_type, value_type>> &vec, const size_t data_size)
 {
     try
     {
-        std::vector<std::string> first;
-        std::vector<int> second;
+        std::vector<key_type> first;
+        std::vector<value_type> second;
         if (create_data(first, data_size) == false)
             return false;
         if (create_data(second, data_size) == false)
             return false;
-        std::vector<std::pair<std::string, int>> temp;
+        std::vector<std::pair<key_type, value_type>> temp;
         for (size_t i = 0; i != data_size; ++i)
             temp.emplace_back(first[i], second[i]);
         vec.swap(temp);
@@ -165,11 +173,40 @@ bool create_data(std::vector<std::pair<std::string, int>> &vec,
     return true;
 }
 
+template <typename Container, typename = void>
+struct is_map_type : qmj::false_type
+{
+    typedef typename Container::value_type key_type;
+    typedef typename Container::value_type mapped_type;
+};
+
+template <typename Container>
+struct is_map_type<Container, qmj::void_t<typename Container::mapped_type>>
+    : qmj::true_type
+{
+    typedef typename Container::key_type key_type;
+    typedef typename Container::mapped_type mapped_type;
+};
+
 template <typename STD_container, typename QMJ_container>
 class Test_data : public testing::Test
 {
   public:
     typedef typename STD_container::value_type value_type;
+    typedef typename is_map_type<STD_container>::key_type key_type;
+    typedef typename is_map_type<STD_container>::mapped_type mapped_type;
+
+    typedef typename qmj::If<
+        qmj::is_same<key_type, value_type>::value, value_type,
+        std::pair<key_type, mapped_type>>::type data_value_type;
+
+    typedef typename qmj::If<
+        qmj::is_same<key_type, value_type>::value, qmj::false_type,
+        qmj::true_type>::type is_map_type;
+
+    typedef typename qmj::If<
+        is_unordered<QMJ_container>::value, qmj::true_type,
+        qmj::false_type>::type is_unordered_type;
 
     bool reset_data(const size_t new_size)
     {
@@ -194,7 +231,7 @@ class Test_data : public testing::Test
 
   protected:
     size_t data_size = 0;
-    std::vector<value_type> data;
+    std::vector<data_value_type> data;
     STD_container std_con;
     QMJ_container qmj_con;
 };
@@ -393,20 +430,50 @@ template <typename STD_container, typename QMJ_container>
 class Test_set_map_base : public Test_data<STD_container, QMJ_container>
 {
   public:
+    enum
+    {
+        is_multi = QMJ_container::is_multi
+    };
     typedef Test_data<STD_container, QMJ_container> base_type;
     typedef typename base_type::value_type value_type;
+    typedef typename base_type::key_type key_type;
+    typedef typename base_type::is_map_type is_map_type;
+    typedef typename base_type::is_unordered_type is_unordered_type;
+
     Test_set_map_base() : base_type() {}
     ~Test_set_map_base() {}
 
-    bool is_equal(const STD_container &left,
-                  const QMJ_container &right)
+    template <bool is_unordered = is_unordered_type::value,
+              bool multi = is_multi>
+    typename qmj::enable_if_t<!is_unordered, bool>
+    is_equal(const STD_container &left, const QMJ_container &right)
+    {
+        return base_type::is_equal();
+    }
+
+    template <bool is_unordered = is_unordered_type::value,
+              bool multi = is_multi>
+    typename qmj::enable_if_t<is_unordered & !is_multi, bool>
+    is_equal(const STD_container &left, const QMJ_container &right)
     {
         if (left.size() != right.size())
             return false;
         for (const value_type &val : left)
-            if (right.find(val) == right.end())
+            if (right.find(get_key(val)) == right.end())
                 return false;
         return true;
+    }
+
+    template <bool is_unordered = is_unordered_type::value,
+              bool multi = is_multi>
+    typename qmj::enable_if_t<is_unordered && multi, bool>
+    is_equal(const STD_container &left, const QMJ_container &right)
+    {
+        if (left.size() != right.size())
+            return false;
+        STD_container qmj_cp(right.begin(), right.end());
+        QMJ_container std_cp(left.begin(), left.end());
+        return (left == qmj_cp && right == std_cp);
     }
 
     bool is_equal()
@@ -449,11 +516,25 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
         EXPECT_TRUE(this->is_equal()) << "not equal after insert";
     }
 
+    template <bool is_map = is_map_type::value>
+    qmj::enable_if_t<!is_map, const key_type>
+    get_key(const value_type &val) const
+    {
+        return val;
+    }
+
+    template <bool is_map = is_map_type::value>
+    qmj::enable_if_t<is_map, const key_type>
+    get_key(const value_type &val) const
+    {
+        return val.first;
+    }
+
     void test_count()
     {
         for (const value_type &val : this->data)
         {
-            ASSERT_EQ(this->std_con.count(val), this->qmj_con.count(val))
+            ASSERT_EQ(this->std_con.count(get_key(val)), this->qmj_con.count(get_key(val)))
                 << "count not equlal ";
         }
     }
@@ -462,7 +543,7 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
     {
         for (const value_type &val : this->data)
         {
-            ASSERT_EQ(*this->std_con.find(val), *this->qmj_con.find(val))
+            ASSERT_EQ(*this->std_con.find(get_key(val)), *this->qmj_con.find(get_key(val)))
                 << "find not equlal ";
         }
     }
@@ -471,15 +552,15 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
     {
         for (size_t i = 0; i != this->data.size() / 3; ++i)
         {
-            size_t std_count = this->std_con.erase(this->data[i]);
-            size_t qmj_count = this->qmj_con.erase(this->data[i]);
+            size_t std_count = this->std_con.erase(get_key(this->data[i]));
+            size_t qmj_count = this->qmj_con.erase(get_key(this->data[i]));
             ASSERT_EQ(std_count, qmj_count) << "count not equal in erase";
         }
 
         for (size_t i = this->data.size() / 3; i != this->data.size() / 2; ++i)
         {
-            auto std_pos = this->std_con.find(this->data[i]);
-            auto qmj_pos = this->qmj_con.find(this->data[i]);
+            auto std_pos = this->std_con.find(get_key(this->data[i]));
+            auto qmj_pos = this->qmj_con.find(get_key(this->data[i]));
             if (std_pos != this->std_con.end())
                 this->std_con.erase(std_pos);
             if (qmj_pos != this->qmj_con.end())
@@ -494,8 +575,8 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
         test_insert();
         for (size_t i = 0; i != this->data.size(); ++i)
         {
-            auto std_range = this->std_con.equal_range(this->data[i]);
-            auto qmj_range = this->qmj_con.equal_range(this->data[i]);
+            auto std_range = this->std_con.equal_range(get_key(this->data[i]));
+            auto qmj_range = this->qmj_con.equal_range(get_key(this->data[i]));
             ASSERT_EQ(qmj::distance(std_range.first, std_range.second),
                       qmj::distance(qmj_range.first, qmj_range.second))
                 << "not equal in equal range";

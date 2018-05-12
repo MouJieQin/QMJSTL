@@ -4,10 +4,12 @@
 
 #include "hashtable.h"
 
-namespace qmj {
+namespace qmj
+{
 template <typename key_type_, typename data_type_, typename HashFunction_,
           typename EqualKey_, typename Alloc, bool is_multi_>
-struct unordered_map_traits {
+struct unordered_map_traits
+{
   typedef key_type_ key_type;
   typedef data_type_ data_type;
   typedef std::pair<const key_type, data_type> value_type;
@@ -15,16 +17,21 @@ struct unordered_map_traits {
   typedef EqualKey_ EqualKey;
   typedef Alloc allocator_type;
 
-  enum { is_multi = is_multi_ };
+  enum
+  {
+    is_multi = is_multi_
+  };
 
   template <typename type1, typename type2>
-  inline static const key_type& ExtractKey(const std::pair<type1, type2>& pr) {
+  inline static const key_type &ExtractKey(const std::pair<type1, type2> &pr)
+  {
     return (pr.first);
   }
 
   template <typename type1, typename type2>
-  inline static const data_type& ExtractData(
-      const std::pair<type1, type2>& pr) {
+  inline static const data_type &ExtractData(
+      const std::pair<type1, type2> &pr)
+  {
     return (pr.second);
   }
 };
@@ -35,13 +42,15 @@ template <typename key_type_, typename data_type_,
           typename Alloc = qmj::allocator<std::pair<const key_type_, data_type_>>>
 class unordered_map
     : public hashtable<unordered_map_traits<key_type_, data_type_, HashFunction,
-                                            EqualKey, Alloc, false>> {
- public:
+                                            EqualKey, Alloc, false>>
+{
+public:
   typedef hashtable<unordered_map_traits<key_type_, data_type_, HashFunction,
                                          EqualKey, Alloc, false>>
       base_type;
 
   typedef data_type_ data_type;
+  typedef data_type mapped_type;
   typedef typename base_type::key_type key_type;
   typedef typename base_type::value_type value_type;
   typedef typename base_type::hasher hasher;
@@ -65,66 +74,75 @@ class unordered_map
 
   explicit unordered_map(size_type n) : base_type(n) {}
 
-  unordered_map(size_type n, const hasher& hf) : base_type(n, hf) {}
+  unordered_map(size_type n, const hasher &hf) : base_type(n, hf) {}
 
-  unordered_map(const size_type n, const hasher& hf, const key_equal& eql)
+  unordered_map(const size_type n, const hasher &hf, const key_equal &eql)
       : base_type(n, hf, eql) {}
 
   template <typename IIter>
-  unordered_map(IIter first, IIter last) : base_type() {
+  unordered_map(IIter first, IIter last) : base_type()
+  {
     base_type::insert(first, last);
   }
 
   template <typename IIter>
-  unordered_map(IIter first, IIter last, size_type n) : base_type(n) {
+  unordered_map(IIter first, IIter last, size_type n) : base_type(n)
+  {
     base_type::insert(first, last);
   }
 
   template <typename IIter>
-  unordered_map(IIter first, IIter last, size_type n, const hasher& hf)
-      : base_type(n, hf) {
+  unordered_map(IIter first, IIter last, size_type n, const hasher &hf)
+      : base_type(n, hf)
+  {
     base_type::insert(first, last);
   }
 
   template <typename IIter>
-  unordered_map(IIter first, IIter last, const size_type n, const hasher& hf,
-                const key_equal& eql)
-      : base_type(n, hf, eql) {
+  unordered_map(IIter first, IIter last, const size_type n, const hasher &hf,
+                const key_equal &eql)
+      : base_type(n, hf, eql)
+  {
     base_type::insert_unique(first, last);
   }
 
-  unordered_map(const self& x) : base_type(x) {}
+  unordered_map(const self &x) : base_type(x) {}
 
-  self& operator=(const self& x) {
+  self &operator=(const self &x)
+  {
     base_type::operator=(x);
     return (*this);
     ;
   }
 
-  self& operator=(self&& x) {
+  self &operator=(self &&x)
+  {
     base_type::operator=(std::move(x));
     return (*this);
   }
 
-  self& operator=(const std::initializer_list<value_type>& lst) {
+  self &operator=(const std::initializer_list<value_type> &lst)
+  {
     base_type::clear();
     base_type::insert(lst.begin(), lst.end());
     return (*this);
   }
 
-  data_type& operator[](const key_type& k) {
+  data_type &operator[](const key_type &k)
+  {
     return (*((base_type::insert({k, data_type()})).first)).second;
   }
 
-  void swap(self& x) noexcept { base_type::swap(x); }
+  void swap(self &x) noexcept { base_type::swap(x); }
 };
 
 template <typename key_type, typename data_type, typename HashFunction,
           typename EqualKey, typename Alloc>
 void swap(
-    unordered_map<key_type, data_type, HashFunction, EqualKey, Alloc>& left,
-    unordered_map<key_type, data_type, HashFunction, EqualKey, Alloc>&
-        right) noexcept {
+    unordered_map<key_type, data_type, HashFunction, EqualKey, Alloc> &left,
+    unordered_map<key_type, data_type, HashFunction, EqualKey, Alloc> &
+        right) noexcept
+{
   left.swap(right);
 }
 
@@ -134,13 +152,15 @@ template <typename key_type_, typename data_type_,
           typename Alloc = qmj::allocator<std::pair<const key_type_, data_type_>>>
 class unordered_multimap
     : public hashtable<unordered_map_traits<key_type_, data_type_, HashFunction,
-                                            EqualKey, Alloc, true>> {
- public:
+                                            EqualKey, Alloc, true>>
+{
+public:
   typedef hashtable<unordered_map_traits<key_type_, data_type_, HashFunction,
                                          EqualKey, Alloc, true>>
       base_type;
 
   typedef data_type_ data_type;
+  typedef data_type mapped_type;
   typedef typename base_type::key_type_ key_type;
   typedef typename base_type::value_type value_type;
   typedef typename base_type::hasher hasher;
@@ -162,68 +182,77 @@ class unordered_multimap
 
   explicit unordered_multimap(size_type n) : base_type(n) {}
 
-  unordered_multimap(size_type n, const hasher& hf) : base_type(n, hf) {}
+  unordered_multimap(size_type n, const hasher &hf) : base_type(n, hf) {}
 
-  unordered_multimap(const size_type n, const hasher& hf, const key_equal& eql)
+  unordered_multimap(const size_type n, const hasher &hf, const key_equal &eql)
       : base_type(n, hf, eql) {}
 
   template <typename IIter>
-  unordered_multimap(IIter first, IIter last) : base_type() {
+  unordered_multimap(IIter first, IIter last) : base_type()
+  {
     base_type::insert(first, last);
   }
 
   template <typename IIter>
-  unordered_multimap(IIter first, IIter last, size_type n) : base_type(n) {
+  unordered_multimap(IIter first, IIter last, size_type n) : base_type(n)
+  {
     base_type::insert(first, last);
   }
 
   template <typename IIter>
-  unordered_multimap(IIter first, IIter last, size_type n, const hasher& hf)
-      : base_type(n, hf) {
+  unordered_multimap(IIter first, IIter last, size_type n, const hasher &hf)
+      : base_type(n, hf)
+  {
     base_type::insert(first, last);
   }
 
   template <typename IIter>
-  unordered_multimap(IIter first, IIter last, size_type n, const hasher& hf,
-                     const key_equal& eql)
-      : base_type(n, hf, eql) {
+  unordered_multimap(IIter first, IIter last, size_type n, const hasher &hf,
+                     const key_equal &eql)
+      : base_type(n, hf, eql)
+  {
     base_type::insert(first, last);
   }
 
-  unordered_multimap(const self& x) : base_type(x) {}
+  unordered_multimap(const self &x) : base_type(x) {}
 
-  self& operator=(const self& x) {
+  self &operator=(const self &x)
+  {
     base_type::operator=(x);
     return (*this);
     ;
   }
 
-  self& operator=(self&& x) {
+  self &operator=(self &&x)
+  {
     base_type::operator=(std::move(x));
     return (*this);
   }
 
-  self& operator=(const std::initializer_list<value_type>& lst) {
+  self &operator=(const std::initializer_list<value_type> &lst)
+  {
     base_type::clear();
     base_type::insert(lst.begin(), lst.end());
     return (*this);
   }
 
-  data_type& operator[](const key_type& k) {
+  data_type &operator[](const key_type &k)
+  {
     return (*((base_type::insert({k, data_type()})).first)).second;
   }
 
-  void swap(self& x) noexcept { base_type::swap(x); }
+  void swap(self &x) noexcept { base_type::swap(x); }
 };
 
 template <typename key_type, typename data_type, typename HashFunction,
           typename EqualKey, typename Alloc>
 void swap(unordered_multimap<key_type, data_type, HashFunction, EqualKey,
-                             Alloc>& left,
+                             Alloc> &left,
           unordered_multimap<key_type, data_type, HashFunction, EqualKey,
-                             Alloc>& right) noexcept {
+                             Alloc> &right) noexcept
+{
   left.swap(right);
 }
-}
+} // namespace qmj
 
 #endif
