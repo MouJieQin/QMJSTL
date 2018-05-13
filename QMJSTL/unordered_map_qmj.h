@@ -161,7 +161,7 @@ public:
 
   typedef data_type_ data_type;
   typedef data_type mapped_type;
-  typedef typename base_type::key_type_ key_type;
+  typedef typename base_type::key_type key_type;
   typedef typename base_type::value_type value_type;
   typedef typename base_type::hasher hasher;
   typedef typename base_type::key_equal key_equal;

@@ -543,12 +543,31 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
     {
         for (const value_type &val : this->data)
         {
-            ASSERT_EQ(*this->std_con.find(get_key(val)), *this->qmj_con.find(get_key(val)))
-                << "find not equlal ";
+            auto std_find = this->std_con.find(get_key(val));
+            auto qmj_find = this->qmj_con.find(get_key(val));
+            if (std_find == this->std_con.end())
+                ASSERT_EQ(qmj_find, this->qmj_con.end())
+                    << "find not equlal ";
+            else
+                ASSERT_EQ(*std_find, *qmj_find)
+                    << "find not equlal ";
         }
     }
 
-    void test_erase()
+    template <bool multi = is_multi>
+    typename qmj::enable_if_t<multi, void>
+    test_erase()
+    {
+        for (size_t i = 0; i != this->data.size() / 3; ++i)
+        {
+            size_t std_count = this->std_con.erase(get_key(this->data[i]));
+            size_t qmj_count = this->qmj_con.erase(get_key(this->data[i]));
+            ASSERT_EQ(std_count, qmj_count) << "count not equal in erase";
+        }
+    }
+
+    template <bool multi = is_multi>
+    typename qmj::enable_if_t<!multi, void> test_erase()
     {
         for (size_t i = 0; i != this->data.size() / 3; ++i)
         {
@@ -567,7 +586,22 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
                 this->qmj_con.erase(qmj_pos);
         }
 
-        EXPECT_TRUE(this->is_equal()) << "unordered_set not equal after erase";
+        EXPECT_TRUE(this->is_equal()) << "not equal after erase";
+    }
+
+    void test_emplace_hint()
+    {
+        for (size_t i = 0; i != this->data.size() / 4; ++i)
+        {
+            this->std_con.emplace_hint(advance(
+                                           this->std_con.begin(), i),
+                                       this->data[i]);
+            this->qmj_con.emplace_hint(advance(
+                                           this->qmj_con.begin(), i),
+                                       this->data[i]);
+        }
+
+        EXPECT_TRUE(this->is_equal()) << "not equal after emplace_hint";
     }
 
     void test_equal_range()
@@ -579,8 +613,6 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
             auto qmj_range = this->qmj_con.equal_range(get_key(this->data[i]));
             ASSERT_EQ(qmj::distance(std_range.first, std_range.second),
                       qmj::distance(qmj_range.first, qmj_range.second))
-                << "not equal in equal range";
-            ASSERT_TRUE(std::equal(std_range.first, std_range.second, qmj_range.first))
                 << "not equal in equal range";
         }
     }

@@ -37,12 +37,6 @@ TEST_F(Test_unordered_multiset_int, Test_assign)
     test_assign();
 }
 
-TEST_F(Test_unordered_multiset_int, Test_equal_range)
-{
-    ASSERT_TRUE(load_data()) << "load data error";
-    test_equal_range();
-}
-
 TEST_F(Test_unordered_multiset_int, Test_count)
 {
     ASSERT_TRUE(load_data()) << "load data error";
@@ -65,6 +59,12 @@ TEST_F(Test_unordered_multiset_int, Test_erase)
 {
     ASSERT_TRUE(load_data()) << "load data error";
     test_erase();
+}
+
+TEST_F(Test_unordered_multiset_int, Test_emplace_hint)
+{
+    ASSERT_TRUE(load_data()) << "load data error";
+    test_emplace_hint();
 }
 
 TEST_F(Test_unordered_multiset_int, Test_all)

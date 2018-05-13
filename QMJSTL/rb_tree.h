@@ -640,6 +640,12 @@ public:
           }
         }
       }
+      else
+      {
+        const_iterator new_pos = lower_bound(get_key(value));
+        destroy_and_free_node(tar);
+        return emplace_hint(new_pos, std::forward<types>(args)...);
+      }
     }
     cur = get_root();
     link_type par = nil;
@@ -1192,6 +1198,6 @@ inline bool operator>=(const rb_tree<traits> &left,
 {
   return (!(left < right));
 }
-}
+} // namespace qmj
 
 #endif
