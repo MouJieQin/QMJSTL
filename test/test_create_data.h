@@ -1,5 +1,5 @@
-#ifndef _NOT_MAP_DATA_CREATE_
-#define _NOT_MAP_DATA_CREATE_
+#ifndef _TEST_CREATE_DATA_
+#define _TEST_CREATE_DATA_
 
 #include <algorithm>
 #include <iterator>
@@ -620,4 +620,4 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
 
 } // namespace test
 } // namespace qmj
-#endif //_NOT_MAP_DATA_CREATE_
+#endif //_TEST_CREATE_DATA_
