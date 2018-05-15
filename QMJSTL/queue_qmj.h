@@ -5,10 +5,10 @@
 #include "heap.h"
 
 namespace qmj {
-template <typename value_type, typename Container = _QMJ deque<value_type>>
+template <typename value_type_, typename Container = _QMJ deque<value_type_>>
 class queue {
  public:
-  typedef typename Container container_type;
+  typedef Container container_type;
   typedef typename container_type::value_type value_type;
   typedef typename container_type::size_type size_type;
   typedef typename container_type::reference reference;
@@ -53,7 +53,7 @@ class queue {
 
   void push(const value_type& val) { c.push_back(val); }
 
-  void push(value_type&& val) { c.push(std::move(val)); }
+  void push(value_type&& val) { c.push_back(std::move(val)); }
 
   template <typename... types>
   void emplace(types&&... args) {
@@ -118,13 +118,13 @@ inline bool operator>=(const _QMJ queue<value_type, Container>& left,
 }
 
 namespace qmj {
-template <typename value_type, typename Container = _QMJ vector<value_type>,
-          typename Compare = std::less<value_type>>
-class priority_queue : public binary_heap<value_type, Container, Compare> {
+template <typename value_type_, typename Container = _QMJ vector<value_type_>,
+          typename Compare = std::less<value_type_>>
+class priority_queue : public binary_heap<value_type_, Container, Compare> {
  public:
-  typedef priority_queue<value_type, Container, Compare> self;
+  typedef priority_queue<value_type_, Container, Compare> self;
   typedef Container container_type;
-  typedef binary_heap<value_type, Container, Compare> my_base;
+  typedef binary_heap<value_type_, Container, Compare> my_base;
 
   typedef typename container_type::value_type value_type;
   typedef typename container_type::size_type size_type;

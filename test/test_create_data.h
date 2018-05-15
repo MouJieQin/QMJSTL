@@ -221,12 +221,13 @@ class Test_data : public testing::Test
 
     bool is_equal() { return qmj::test::is_equal(std_con, qmj_con); }
 
-    void test_clear()
+    bool is_euqal_special()
     {
-        std_con.clear();
-        qmj_con.clear();
-        EXPECT_TRUE(is_equal())
-            << "qmj::Container is not equal to std::Container after clear";
+        if (std_con.size() != qmj_con.size())
+            return false;
+        STD_container qmj_cp(qmj_con.begin(), qmj_con.end());
+        QMJ_container std_cp(std_con.begin(), std_con.end());
+        return (std_con == qmj_cp && qmj_con == std_cp);
     }
 
   protected:
@@ -469,11 +470,7 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
     typename qmj::enable_if_t<is_unordered && multi, bool>
     is_equal(const STD_container &left, const QMJ_container &right)
     {
-        if (left.size() != right.size())
-            return false;
-        STD_container qmj_cp(right.begin(), right.end());
-        QMJ_container std_cp(left.begin(), left.end());
-        return (left == qmj_cp && right == std_cp);
+        return base_type::is_euqal_special();
     }
 
     bool is_equal()
@@ -618,6 +615,90 @@ class Test_set_map_base : public Test_data<STD_container, QMJ_container>
     }
 };
 
+template <typename STD_container, typename QMJ_container>
+class Test_stack_queue_base : public Test_data<STD_container, QMJ_container>
+{
+  public:
+    typedef Test_data<STD_container, QMJ_container> base_type;
+    typedef typename base_type::value_type value_type;
+
+    template <typename Container, typename = void, typename = qmj::void_t<decltype(std::declval<Container>().top())>>
+    const value_type &get_value(const Container &con)
+    {
+        return con.top();
+    }
+
+    template <typename Container, typename = qmj::void_t<decltype(std::declval<Container>().front())>>
+    const value_type &get_value(const Container &con)
+    {
+        return con.front();
+    }
+
+    bool load_data()
+    {
+        return (this->reset_data(TEST_DATASIZE) && test_assign());
+    }
+
+    bool is_equal()
+    {
+        if (this->std_con.size() != this->qmj_con.size())
+            return false;
+        STD_container std_cp(this->std_con);
+        QMJ_container qmj_cp(this->qmj_con);
+        for (size_t i = 0; i != std_cp.size(); ++i)
+        {
+            if (get_value(std_cp) != get_value(qmj_cp))
+                return false;
+            std_cp.pop();
+            qmj_cp.pop();
+        }
+        return true;
+    }
+
+    bool test_assign()
+    {
+        STD_container std_assign;
+        QMJ_container qmj_assign;
+        for (const value_type &val : this->data)
+        {
+            std_assign.push(val);
+            qmj_assign.push(val);
+        }
+        this->std_con = std_assign;
+        this->qmj_con = qmj_assign;
+        bool result = is_equal();
+        EXPECT_TRUE(result) << "not equal after assign";
+        return result;
+    }
+
+    void test_push()
+    {
+        for (const value_type &val : this->data)
+        {
+            this->std_con.push(val);
+            this->qmj_con.push(val);
+        }
+        EXPECT_TRUE(is_equal()) << "not eaul after push";
+    }
+
+    void test_pop()
+    {
+        for (size_t i = 0; i != this->std_con.size() / 3; ++i)
+        {
+            this->std_con.pop();
+            this->qmj_con.pop();
+        }
+
+        EXPECT_TRUE(is_equal()) << "not eaul after pop";
+    }
+
+    void test_top()
+    {
+        EXPECT_EQ(this->std_con.top(), this->qmj_con.top());
+    }
+};
+
 } // namespace test
 } // namespace qmj
+
 #endif //_TEST_CREATE_DATA_
